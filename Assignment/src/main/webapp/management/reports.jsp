@@ -58,7 +58,7 @@
         </select>
     </div>
 
-    <div class="form-group" id="periodGroup" style="<%= "consumption".equals(reportType) ? "" : "display:none;"%>">
+    <div class="form-group" id="periodGroup" style="<%= "consumption".equals(reportType) ? "" : "display:none"%>">
         <label for="period">Season:</label>
         <select id="period" name="period">
             <option value="">All Seasons</option>
@@ -78,7 +78,15 @@
 <div style="margin-top: 30px;">
     <report:generateReport type="<%= reportType%>" location="<%= location%>" period="<%= period%>" />
 </div>
+
+<!-- Main chart container - used for single chart displays -->
+<div style="margin-top: 30px;">
+    <div id="reportChart" style="width: 100%; height: 400px;"></div>
+</div>
 <% }%>
+
+<!-- Include ECharts library -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
 
 <script>
     document.getElementById('reportType').addEventListener('change', function () {
