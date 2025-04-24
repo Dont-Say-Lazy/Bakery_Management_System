@@ -1,7 +1,7 @@
 <%-- 
     Document   : dashboard
     Created on : Apr 23, 2025, 11:18:35 PM
-    Author     : Rain
+    Author     : AlexS
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -22,7 +22,7 @@
             <p>Manage system users</p>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon">
             <i class="fas fa-apple-alt"></i>
@@ -32,7 +32,7 @@
             <p>Inventory and product management</p>
         </div>
     </div>
-    
+
     <div class="stat-card">
         <div class="stat-icon">
             <i class="fas fa-chart-pie"></i>
@@ -46,7 +46,7 @@
 
 <div class="dashboard-section">
     <h2><i class="fas fa-tachometer-alt"></i> Management Controls</h2>
-    
+
     <div class="management-panels">
         <div class="panel-card">
             <div class="panel-icon">
@@ -60,7 +60,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="panel-card">
             <div class="panel-icon">
                 <i class="fas fa-apple-alt"></i>
@@ -73,7 +73,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="panel-card">
             <div class="panel-icon">
                 <i class="fas fa-file-alt"></i>
@@ -95,20 +95,20 @@
         border-bottom: 1px solid rgba(77, 208, 197, 0.2);
         padding-bottom: 15px;
     }
-    
+
     .dashboard-welcome {
         color: #777777;
         font-size: 16px;
         margin-top: 5px;
     }
-    
+
     .dashboard-stats {
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
         margin-bottom: 30px;
     }
-    
+
     .stat-card {
         flex: 1;
         min-width: 200px;
@@ -121,12 +121,12 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: 1px solid rgba(77, 208, 197, 0.1);
     }
-    
+
     .stat-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 15px rgba(77, 208, 197, 0.15);
     }
-    
+
     .stat-icon {
         width: 50px;
         height: 50px;
@@ -137,47 +137,47 @@
         justify-content: center;
         margin-right: 15px;
     }
-    
+
     .stat-icon i {
         font-size: 24px;
         color: #4DD0C5;
     }
-    
+
     .stat-info h3 {
         margin: 0;
         font-size: 16px;
         font-weight: 600;
         color: #333333;
     }
-    
+
     .stat-info p {
         margin: 5px 0 0;
         color: #777777;
         font-size: 14px;
     }
-    
+
     .dashboard-section {
         margin-bottom: 40px;
     }
-    
+
     .dashboard-section h2 {
         display: flex;
         align-items: center;
         font-size: 20px;
         margin-bottom: 20px;
     }
-    
+
     .dashboard-section h2 i {
         margin-right: 10px;
         color: #4DD0C5;
     }
-    
+
     .management-panels {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 20px;
     }
-    
+
     .panel-card {
         background-color: #ffffff;
         border-radius: 10px;
@@ -186,12 +186,12 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: 1px solid rgba(77, 208, 197, 0.1);
     }
-    
+
     .panel-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 15px rgba(77, 208, 197, 0.15);
     }
-    
+
     .panel-icon {
         padding: 30px;
         background-color: rgba(77, 208, 197, 0.1);
@@ -199,34 +199,34 @@
         align-items: center;
         justify-content: center;
     }
-    
+
     .panel-icon i {
         font-size: 40px;
         color: #4DD0C5;
     }
-    
+
     .panel-content {
         padding: 20px;
         text-align: center;
     }
-    
+
     .panel-content h3 {
         margin: 0;
         font-size: 18px;
         font-weight: 600;
         color: #333333;
     }
-    
+
     .panel-content p {
         margin: 10px 0 20px;
         color: #777777;
         font-size: 14px;
     }
-    
+
     .panel-actions {
         margin-top: 15px;
     }
-    
+
     @media (max-width: 768px) {
         .management-panels {
             grid-template-columns: 1fr;

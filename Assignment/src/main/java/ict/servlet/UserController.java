@@ -6,7 +6,7 @@ package ict.servlet;
 
 /**
  *
- * @author Rain
+ * @author AlexS
  */
 import ict.bean.LocationBean;
 import ict.bean.UserBean;
@@ -151,7 +151,7 @@ public class UserController extends HttpServlet {
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String userIDStr = request.getParameter("userID");
-        
+
         if (userIDStr != null && !userIDStr.isEmpty()) {
             int userID = Integer.parseInt(userIDStr);
             UserBean user = userDB.getUserByID(userID);

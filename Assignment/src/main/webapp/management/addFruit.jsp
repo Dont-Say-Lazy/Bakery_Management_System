@@ -1,7 +1,7 @@
 <%-- 
     Document   : addFruit
     Created on : Apr 23, 2025, 11:05:27 PM
-    Author     : Rain
+    Author     : AlexS
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -11,17 +11,17 @@
 
 <form action="<%=request.getContextPath()%>/fruit" method="post">
     <input type="hidden" name="action" value="add">
-    
+
     <div class="form-group">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required>
     </div>
-    
+
     <div class="form-group">
         <label for="description">Description:</label>
         <textarea id="description" name="description" rows="4"></textarea>
     </div>
-    
+
     <div class="form-group">
         <label for="sourceCountry">Source Country:</label>
         <select id="sourceCountry" name="sourceCountry" required>
@@ -31,7 +31,7 @@
             <option value="Hong Kong">Hong Kong</option>
         </select>
     </div>
-    
+
     <div style="margin-top: 20px;">
         <button type="submit" class="btn">Save</button>
         <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>

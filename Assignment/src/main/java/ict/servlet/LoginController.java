@@ -6,7 +6,7 @@ package ict.servlet;
 
 /**
  *
- * @author Rain
+ * @author AlexS
  */
 import ict.bean.UserBean;
 import ict.db.UserDB;
@@ -21,8 +21,9 @@ import javax.servlet.http.HttpSession;
 
 @WebServlet(name = "LoginController", urlPatterns = {"/login"})
 public class LoginController extends HttpServlet {
+
     private UserDB userDB;
-    
+
     @Override
     public void init() {
         String dbUrl = getServletContext().getInitParameter("dbUrl");
@@ -30,18 +31,18 @@ public class LoginController extends HttpServlet {
         String dbPassword = getServletContext().getInitParameter("dbPassword");
         userDB = new UserDB(dbUrl, dbUser, dbPassword);
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doPost(request, response);
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        
+
         if (action == null) {
             // Forward to login page if no action is specified
             RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
@@ -56,18 +57,18 @@ public class LoginController extends HttpServlet {
             rd.forward(request, response);
         }
     }
-    
+
     private void doLogin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        
+
         // Validate user
         if (userDB.isValidUser(username, password)) {
             UserBean user = userDB.getUserByUsername(username);
             HttpSession session = request.getSession(true);
             session.setAttribute("userInfo", user);
-            
+
             // Redirect based on user role
             if (user.getRole().equals("shop_staff")) {
                 response.sendRedirect("shop/dashboard.jsp");
@@ -86,7 +87,7 @@ public class LoginController extends HttpServlet {
             rd.forward(request, response);
         }
     }
-    
+
     private void doLogout(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);

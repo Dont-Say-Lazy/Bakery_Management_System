@@ -1,7 +1,7 @@
 <%-- 
     Document   : index
     Created on : Apr 23, 2025, 11:14:26 PM
-    Author     : Rain
+    Author     : AlexS
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

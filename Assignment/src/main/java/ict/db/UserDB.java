@@ -6,7 +6,7 @@ package ict.db;
 
 /**
  *
- * @author Rain
+ * @author AlexS
  */
 import ict.bean.UserBean;
 import java.sql.Connection;
@@ -16,18 +16,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class UserDB {
+
     private DBConnection dbConnection;
-    
+
     public UserDB(String url, String username, String password) {
         dbConnection = new DBConnection(url, username, password);
     }
-    
+
     public boolean isValidUser(String username, String password) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         boolean isValid = false;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "SELECT * FROM Users WHERE Username=? AND Password=?";
@@ -35,7 +36,7 @@ public class UserDB {
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 isValid = true;
             }
@@ -56,23 +57,23 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return isValid;
     }
-    
+
     public UserBean getUserByUsername(String username) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         UserBean user = null;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "SELECT * FROM Users WHERE Username=?";
             pstmt = conn.prepareStatement(preQueryStatement);
             pstmt.setString(1, username);
             rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 user = new UserBean();
                 user.setUserID(rs.getInt("UserID"));
@@ -99,22 +100,22 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return user;
     }
-    
+
     public ArrayList<UserBean> queryUser() {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         ArrayList<UserBean> users = new ArrayList<>();
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "SELECT * FROM Users";
             pstmt = conn.prepareStatement(preQueryStatement);
             rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 UserBean user = new UserBean();
                 user.setUserID(rs.getInt("UserID"));
@@ -142,15 +143,15 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return users;
     }
-    
+
     public boolean addUser(UserBean user) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         boolean isSuccess = false;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "INSERT INTO Users (Username, Password, Role, Name, LocationID) VALUES (?,?,?,?,?)";
@@ -160,7 +161,7 @@ public class UserDB {
             pstmt.setString(3, user.getRole());
             pstmt.setString(4, user.getName());
             pstmt.setInt(5, user.getLocationID());
-            
+
             int rowCount = pstmt.executeUpdate();
             if (rowCount >= 1) {
                 isSuccess = true;
@@ -179,15 +180,15 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return isSuccess;
     }
-    
+
     public boolean updateUser(UserBean user) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         boolean isSuccess = false;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "UPDATE Users SET Username=?, Password=?, Role=?, Name=?, LocationID=? WHERE UserID=?";
@@ -198,7 +199,7 @@ public class UserDB {
             pstmt.setString(4, user.getName());
             pstmt.setInt(5, user.getLocationID());
             pstmt.setInt(6, user.getUserID());
-            
+
             int rowCount = pstmt.executeUpdate();
             if (rowCount >= 1) {
                 isSuccess = true;
@@ -217,21 +218,21 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return isSuccess;
     }
-    
+
     public boolean deleteUser(int userID) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         boolean isSuccess = false;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "DELETE FROM Users WHERE UserID=?";
             pstmt = conn.prepareStatement(preQueryStatement);
             pstmt.setInt(1, userID);
-            
+
             int rowCount = pstmt.executeUpdate();
             if (rowCount >= 1) {
                 isSuccess = true;
@@ -250,23 +251,23 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return isSuccess;
     }
-    
+
     public UserBean getUserByID(int userID) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         UserBean user = null;
-        
+
         try {
             conn = dbConnection.getConnection();
             String preQueryStatement = "SELECT * FROM Users WHERE UserID=?";
             pstmt = conn.prepareStatement(preQueryStatement);
             pstmt.setInt(1, userID);
             rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 user = new UserBean();
                 user.setUserID(rs.getInt("UserID"));
@@ -293,7 +294,7 @@ public class UserDB {
                 ex.printStackTrace();
             }
         }
-        
+
         return user;
     }
 }
