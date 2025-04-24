@@ -9,22 +9,12 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="ict.bean.FruitBean"%>
 <%@page import="ict.bean.LocationBean"%>
-<%@page import="ict.bean.StockBean"%>
 <%@page import="ict.db.StockDB"%>
-
-<% 
-    String dbUrl = application.getInitParameter("dbUrl");
-    String dbUser = application.getInitParameter("dbUser");
-    String dbPassword = application.getInitParameter("dbPassword");
-    
-    StockDB stockDB = new StockDB(dbUrl, dbUser, dbPassword);
-%>
 
 <h1>Request to Borrow Fruit</h1>
 
-<%-- Display any messages --%>
 <% if (request.getAttribute("message") != null) { %>
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
         <%= request.getAttribute("message") %>
     </div>
 <% } %>
@@ -41,13 +31,23 @@
                 if (otherShops != null) {
                     for (LocationBean shop : otherShops) {
             %>
-                <option value="<%= shop.getLocationID() %>"><%= shop.getName() %> (<%= shop.getCity() %>)</option>
+                <option value="<%= shop.getLocationID() %>"><%= shop.getName() %></option>
             <% 
                     }
                 }
             %>
         </select>
-        <small class="form-text text-muted">Select a shop in your city to borrow from.</small>
+    </div>
+    
+    <div id="shopStockInfo" style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 5px; display: none;">
+        <p id="shopStockMessage"></p>
+    </div>
+    
+    <div class="form-group">
+        <label for="fruitID">Fruit:</label>
+        <select id="fruitID" name="fruitID" class="form-control" required onchange="updateStockInfo()">
+            <option value="">Select Shop First</option>
+        </select>
     </div>
     
     <div id="stockInfo" style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-radius: 5px; display: none;">
@@ -55,30 +55,13 @@
     </div>
     
     <div class="form-group">
-        <label for="fruitID">Fruit:</label>
-        <select id="fruitID" name="fruitID" class="form-control" required onchange="updateMaxQuantity()">
-            <option value="">Select Fruit</option>
-            <% 
-                ArrayList<FruitBean> fruits = (ArrayList<FruitBean>) request.getAttribute("fruits");
-                if (fruits != null) {
-                    for (FruitBean fruit : fruits) {
-            %>
-                <option value="<%= fruit.getFruitID() %>" data-id="<%= fruit.getFruitID() %>"><%= fruit.getName() %></option>
-            <% 
-                    }
-                }
-            %>
-        </select>
-    </div>
-    
-    <div class="form-group">
         <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" min="1" class="form-control" required>
-        <small id="quantityHelp" class="form-text text-muted">Enter the quantity you wish to borrow.</small>
+        <input type="number" id="quantity" name="quantity" min="1" class="form-control" required onchange="validateQuantity()">
+        <small id="quantityHelp" class="form-text text-muted">Enter the quantity needed.</small>
     </div>
     
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn" id="submitBtn">Submit Request</button>
+        <button type="submit" id="submitBtn" class="btn">Submit Request</button>
         <a href="<%=request.getContextPath()%>/borrowing?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>
     </div>
 </form>
@@ -91,19 +74,18 @@
     function updateFruitOptions() {
         var shopID = document.getElementById('sourceShopID').value;
         var fruitSelect = document.getElementById('fruitID');
+        var shopStockInfo = document.getElementById('shopStockInfo');
+        var shopStockMessage = document.getElementById('shopStockMessage');
         
         if (!shopID) {
             // Reset fruit dropdown if no shop selected
-            fruitSelect.innerHTML = '<option value="">Select Fruit</option>';
-            document.getElementById('stockInfo').style.display = 'none';
+            fruitSelect.innerHTML = '<option value="">Select Shop First</option>';
+            shopStockInfo.style.display = 'none';
             return;
         }
         
         // Show loading indicator
         fruitSelect.innerHTML = '<option value="">Loading fruits...</option>';
-        document.getElementById('stockMessage').textContent = 'Loading available fruits...';
-        document.getElementById('stockInfo').style.display = 'block';
-        document.getElementById('stockInfo').style.backgroundColor = '#f8f9fa';
         
         // Get stock data from server for this shop
         fetch('<%=request.getContextPath()%>/borrowing?action=getShopStock&shopID=' + shopID)
@@ -116,6 +98,10 @@
                 
                 // Add options for fruits with stock
                 if (data && data.length > 0) {
+                    shopStockMessage.textContent = 'This shop has ' + data.length + ' types of fruit available.';
+                    shopStockInfo.style.display = 'block';
+                    shopStockInfo.style.backgroundColor = '#d4edda';
+                    
                     data.forEach(item => {
                         var option = document.createElement('option');
                         option.value = item.fruitID;
@@ -123,34 +109,30 @@
                         option.textContent = item.fruitName + ' (Available: ' + item.quantity + ')';
                         fruitSelect.appendChild(option);
                     });
-                    document.getElementById('stockMessage').textContent = 'Select a fruit to see available stock';
                 } else {
-                    fruitSelect.innerHTML = '<option value="">No fruits available in this shop</option>';
-                    document.getElementById('stockMessage').textContent = 'This shop has no fruit stock available for borrowing';
-                    document.getElementById('stockInfo').style.backgroundColor = '#f8d7da';
+                    shopStockMessage.textContent = 'This shop has no fruits available for borrowing.';
+                    shopStockInfo.style.display = 'block';
+                    shopStockInfo.style.backgroundColor = '#f8d7da';
+                    fruitSelect.innerHTML = '<option value="">No fruits available</option>';
                 }
                 
-                // Update max quantity
-                updateMaxQuantity();
+                // Update stock info
+                updateStockInfo();
             })
             .catch(error => {
                 console.error('Error fetching shop stock:', error);
                 fruitSelect.innerHTML = '<option value="">Error loading fruits</option>';
-                document.getElementById('stockMessage').textContent = 'Error loading fruit data. Please try again.';
-                document.getElementById('stockInfo').style.backgroundColor = '#f8d7da';
             });
     }
     
-    // Function to update max quantity based on selected fruit
-    function updateMaxQuantity() {
+    // Function to update stock info based on selected fruit
+    function updateStockInfo() {
         var fruitSelect = document.getElementById('fruitID');
-        var quantityInput = document.getElementById('quantity');
         var stockInfo = document.getElementById('stockInfo');
         var stockMessage = document.getElementById('stockMessage');
-        var submitBtn = document.getElementById('submitBtn');
         
         if (fruitSelect.selectedIndex <= 0) {
-            quantityInput.max = '';
+            stockInfo.style.display = 'none';
             return;
         }
         
@@ -158,19 +140,41 @@
         var stock = selectedOption.getAttribute('data-stock');
         
         if (stock && stock > 0) {
-            quantityInput.max = stock;
-            quantityInput.value = Math.min(quantityInput.value || 1, stock);
             stockMessage.textContent = 'Available stock: ' + stock + ' units';
             stockInfo.style.display = 'block';
             stockInfo.style.backgroundColor = '#d4edda';
-            submitBtn.disabled = false;
+            document.getElementById('quantity').max = stock;
+            document.getElementById('quantity').value = Math.min(document.getElementById('quantity').value || 1, stock);
         } else {
-            quantityInput.max = '0';
-            quantityInput.value = '';
-            stockMessage.textContent = 'No stock available for this fruit in the selected shop.';
-            stockInfo.style.display = 'block';
-            stockInfo.style.backgroundColor = '#f8d7da';
+            stockInfo.style.display = 'none';
+        }
+        
+        validateQuantity();
+    }
+    
+    // Function to validate quantity
+    function validateQuantity() {
+        var fruitSelect = document.getElementById('fruitID');
+        var quantityInput = document.getElementById('quantity');
+        var submitBtn = document.getElementById('submitBtn');
+        
+        if (fruitSelect.selectedIndex <= 0) {
+            return;
+        }
+        
+        var selectedOption = fruitSelect.options[fruitSelect.selectedIndex];
+        var stock = parseInt(selectedOption.getAttribute('data-stock'));
+        var quantity = parseInt(quantityInput.value);
+        
+        if (quantity > stock) {
+            quantityInput.setCustomValidity('Requested quantity exceeds available stock');
             submitBtn.disabled = true;
+        } else if (quantity <= 0) {
+            quantityInput.setCustomValidity('Quantity must be at least 1');
+            submitBtn.disabled = true;
+        } else {
+            quantityInput.setCustomValidity('');
+            submitBtn.disabled = false;
         }
     }
     

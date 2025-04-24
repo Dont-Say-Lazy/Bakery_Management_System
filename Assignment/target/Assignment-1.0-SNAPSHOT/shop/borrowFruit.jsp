@@ -33,6 +33,7 @@
             <th>Quantity</th>
             <th>Request Date</th>
             <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -44,6 +45,19 @@
                 for (BorrowingBean borrowing : borrowings) {
                     if (borrowing.getDestinationShopID() == user.getLocationID()) {
                         hasRequests = true;
+                        
+                        String status = borrowing.getStatus();
+                        String statusClass = "";
+                        
+                        if (status.equals("approved")) {
+                            statusClass = "color: green;";
+                        } else if (status.equals("rejected")) {
+                            statusClass = "color: red;";
+                        } else if (status.equals("delivered")) {
+                            statusClass = "color: blue;";
+                        } else if (status.equals("pending")) {
+                            statusClass = "color: orange;";
+                        }
         %>
         <tr>
             <td><%= borrowing.getBorrowingID() %></td>
@@ -51,20 +65,13 @@
             <td><%= borrowing.getFruitName() %></td>
             <td><%= borrowing.getQuantity() %></td>
             <td><%= borrowing.getRequestDate() %></td>
+            <td><span style="<%= statusClass %>"><%= status %></span></td>
             <td>
-                <% 
-                    String status = borrowing.getStatus();
-                    String statusClass = "";
-                    
-                    if (status.equals("approved")) {
-                        statusClass = "color: green;";
-                    } else if (status.equals("rejected")) {
-                        statusClass = "color: red;";
-                    } else if (status.equals("delivered")) {
-                        statusClass = "color: blue;";
-                    }
-                %>
-                <span style="<%= statusClass %>"><%= status %></span>
+                <% if (status.equals("approved")) { %>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=markReceived&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: blue;">Mark as Received</a>
+                <% } else { %>
+                    -
+                <% } %>
             </td>
         </tr>
         <% 
@@ -75,7 +82,7 @@
             if (!hasRequests) {
         %>
         <tr>
-            <td colspan="6">No borrowing requests found</td>
+            <td colspan="7">No borrowing requests found</td>
         </tr>
         <% } %>
     </tbody>
@@ -103,6 +110,19 @@
                 for (BorrowingBean borrowing : borrowings) {
                     if (borrowing.getSourceShopID() == user.getLocationID()) {
                         hasIncoming = true;
+                        
+                        String status = borrowing.getStatus();
+                        String statusClass = "";
+                        
+                        if (status.equals("approved")) {
+                            statusClass = "color: green;";
+                        } else if (status.equals("rejected")) {
+                            statusClass = "color: red;";
+                        } else if (status.equals("delivered")) {
+                            statusClass = "color: blue;";
+                        } else if (status.equals("pending")) {
+                            statusClass = "color: orange;";
+                        }
         %>
         <tr>
             <td><%= borrowing.getBorrowingID() %></td>
@@ -110,27 +130,13 @@
             <td><%= borrowing.getFruitName() %></td>
             <td><%= borrowing.getQuantity() %></td>
             <td><%= borrowing.getRequestDate() %></td>
-            <td>
-                <% 
-                    String status = borrowing.getStatus();
-                    String statusClass = "";
-                    
-                    if (status.equals("approved")) {
-                        statusClass = "color: green;";
-                    } else if (status.equals("rejected")) {
-                        statusClass = "color: red;";
-                    } else if (status.equals("delivered")) {
-                        statusClass = "color: blue;";
-                    }
-                %>
-                <span style="<%= statusClass %>"><%= status %></span>
-            </td>
+            <td><span style="<%= statusClass %>"><%= status %></span></td>
             <td>
                 <% if (status.equals("pending")) { %>
-                <a href="<%=request.getContextPath()%>/borrowing?action=approve&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: green;">Approve</a>
-                <a href="<%=request.getContextPath()%>/borrowing?action=reject&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn btn-danger">Reject</a>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=approve&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: green;">Approve</a>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=reject&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn btn-danger">Reject</a>
                 <% } else { %>
-                <span>Processed</span>
+                    <span>Processed</span>
                 <% } %>
             </td>
         </tr>

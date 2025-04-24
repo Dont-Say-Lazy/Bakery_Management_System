@@ -65,7 +65,7 @@
             </div>
         </a>
         
-        <a href="borrowFruit.jsp" class="action-card">
+        <a href="<%=request.getContextPath()%>/borrowing?action=list" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-exchange-alt"></i>
             </div>
@@ -75,7 +75,7 @@
             </div>
         </a>
         
-        <a href="checkReserves.jsp" class="action-card">
+        <a href="<%=request.getContextPath()%>/reservation?action=list" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-clipboard-list"></i>
             </div>
@@ -85,7 +85,7 @@
             </div>
         </a>
         
-        <a href="updateStock.jsp" class="action-card">
+        <a href="<%=request.getContextPath()%>/stock?action=view" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-sync-alt"></i>
             </div>

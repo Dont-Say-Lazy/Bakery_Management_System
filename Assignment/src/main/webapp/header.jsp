@@ -280,13 +280,13 @@
             <a href="<%=request.getContextPath()%>/shop/reserveFruit.jsp" class="<%= request.getRequestURI().endsWith("/shop/reserveFruit.jsp") ? "active" : "" %>">
                 <i class="fas fa-calendar-plus"></i> Reserve Fruit
             </a>
-            <a href="<%=request.getContextPath()%>/shop/borrowFruit.jsp" class="<%= request.getRequestURI().endsWith("/shop/borrowFruit.jsp") ? "active" : "" %>">
+            <a href="<%=request.getContextPath()%>/borrowing?action=list" class="<%= request.getRequestURI().endsWith("/shop/borrowFruit.jsp") ? "active" : "" %>">
                 <i class="fas fa-exchange-alt"></i> Borrow Fruit
             </a>
-            <a href="<%=request.getContextPath()%>/shop/checkReserves.jsp" class="<%= request.getRequestURI().endsWith("/shop/checkReserves.jsp") ? "active" : "" %>">
+            <a href="<%=request.getContextPath()%>/reservation?action=list" class="<%= request.getRequestURI().endsWith("/shop/checkReserves.jsp") ? "active" : "" %>">
                 <i class="fas fa-clipboard-list"></i> Check Reserves
             </a>
-            <a href="<%=request.getContextPath()%>/shop/updateStock.jsp" class="<%= request.getRequestURI().endsWith("/shop/updateStock.jsp") ? "active" : "" %>">
+            <a href="<%=request.getContextPath()%>/stock?action=view" class="<%= request.getRequestURI().endsWith("/shop/updateStock.jsp") ? "active" : "" %>">
                 <i class="fas fa-sync-alt"></i> Update Stock
             </a>
         <% } else if (role.equals("warehouse_staff")) { %>

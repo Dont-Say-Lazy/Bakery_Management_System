@@ -11,8 +11,8 @@ package ict.servlet;
 import ict.bean.BorrowingBean;
 import ict.bean.FruitBean;
 import ict.bean.LocationBean;
-import ict.bean.UserBean;
 import ict.bean.StockBean;
+import ict.bean.UserBean;
 import ict.db.BorrowingDB;
 import ict.db.FruitDB;
 import ict.db.LocationDB;
@@ -103,6 +103,13 @@ public class BorrowingController extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                 }
                 break;
+            case "markReceived":
+                if (role.equals("shop_staff")) {
+                    markBorrowingReceived(request, response, user);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
             case "getShopStock":
                 getShopStock(request, response);
                 break;
@@ -162,11 +169,21 @@ public class BorrowingController extends HttpServlet {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         
-        // Check if the source shop has enough stock
+        // Check if source shop has enough stock
         StockBean sourceStock = stockDB.getStockByLocationAndFruit(sourceShopID, fruitID);
         
         if (sourceStock == null || sourceStock.getQuantity() < quantity) {
-            request.setAttribute("message", "The source shop does not have enough stock for this borrowing request.");
+            request.setAttribute("message", "Cannot create borrowing request: Insufficient stock at the source shop.");
+            showAddForm(request, response, user);
+            return;
+        }
+        
+        // Check if the source shop is in the same city as the user's shop
+        LocationBean userLocation = locationDB.getLocationByID(user.getLocationID());
+        LocationBean sourceLocation = locationDB.getLocationByID(sourceShopID);
+        
+        if (!userLocation.getCity().equals(sourceLocation.getCity())) {
+            request.setAttribute("message", "Cannot borrow from a shop outside your city.");
             showAddForm(request, response, user);
             return;
         }
@@ -222,51 +239,25 @@ public class BorrowingController extends HttpServlet {
             return;
         }
         
-        // Check if source shop still has enough stock
+        // Check if source shop has enough stock
         StockBean sourceStock = stockDB.getStockByLocationAndFruit(borrowing.getSourceShopID(), borrowing.getFruitID());
         
         if (sourceStock == null || sourceStock.getQuantity() < borrowing.getQuantity()) {
-            request.setAttribute("message", "Insufficient stock to approve this borrowing request.");
+            request.setAttribute("message", "Cannot approve: Insufficient stock at your shop to fulfill this request.");
             listBorrowings(request, response, user);
             return;
         }
         
-        // Begin transaction by updating status
         boolean success = borrowingDB.updateBorrowingStatus(borrowingID, "approved");
         
         if (success) {
             // Update stock levels for both shops
-            boolean sourceUpdated = false;
-            boolean destUpdated = false;
-            
             // Reduce source shop stock
-            int newSourceQuantity = sourceStock.getQuantity() - borrowing.getQuantity();
-            sourceStock.setQuantity(newSourceQuantity);
-            sourceUpdated = stockDB.updateStock(sourceStock);
-            
+            stockDB.updateStockQuantity(borrowing.getSourceShopID(), borrowing.getFruitID(), -borrowing.getQuantity());
             // Increase destination shop stock
-            StockBean destStock = stockDB.getStockByLocationAndFruit(borrowing.getDestinationShopID(), borrowing.getFruitID());
+            stockDB.updateStockQuantity(borrowing.getDestinationShopID(), borrowing.getFruitID(), borrowing.getQuantity());
             
-            if (destStock != null) {
-                // Update existing stock
-                int newDestQuantity = destStock.getQuantity() + borrowing.getQuantity();
-                destStock.setQuantity(newDestQuantity);
-                destUpdated = stockDB.updateStock(destStock);
-            } else {
-                // Create new stock entry
-                destStock = new StockBean();
-                destStock.setLocationID(borrowing.getDestinationShopID());
-                destStock.setFruitID(borrowing.getFruitID());
-                destStock.setQuantity(borrowing.getQuantity());
-                destUpdated = stockDB.addStock(destStock);
-            }
-            
-            if (sourceUpdated && destUpdated) {
-                request.setAttribute("message", "Borrowing request approved and stock updated successfully.");
-            } else {
-                // If stock update failed, we should log this and possibly rollback the status change
-                request.setAttribute("message", "Borrowing request approved but there was an issue updating stock levels.");
-            }
+            request.setAttribute("message", "Borrowing request approved successfully.");
         } else {
             request.setAttribute("message", "Failed to approve borrowing request.");
         }
@@ -296,6 +287,40 @@ public class BorrowingController extends HttpServlet {
             request.setAttribute("message", "Borrowing request rejected successfully.");
         } else {
             request.setAttribute("message", "Failed to reject borrowing request.");
+        }
+        
+        listBorrowings(request, response, user);
+    }
+    
+    private void markBorrowingReceived(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int borrowingID = Integer.parseInt(request.getParameter("borrowingID"));
+        BorrowingBean borrowing = borrowingDB.getBorrowingByID(borrowingID);
+        
+        if (borrowing == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Borrowing request not found");
+            return;
+        }
+        
+        // Check if this user is from the destination shop
+        if (borrowing.getDestinationShopID() != user.getLocationID()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You can only mark received for borrowing requests to your shop");
+            return;
+        }
+        
+        // Check if the borrowing is in the approved state
+        if (!borrowing.getStatus().equals("approved")) {
+            request.setAttribute("message", "This borrowing request is not in the approved state.");
+            listBorrowings(request, response, user);
+            return;
+        }
+        
+        boolean success = borrowingDB.updateBorrowingStatus(borrowingID, "delivered");
+        
+        if (success) {
+            request.setAttribute("message", "Borrowing marked as received successfully.");
+        } else {
+            request.setAttribute("message", "Failed to mark borrowing as received.");
         }
         
         listBorrowings(request, response, user);
