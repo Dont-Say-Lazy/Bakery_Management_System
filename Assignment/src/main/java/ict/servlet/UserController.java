@@ -150,19 +150,25 @@ public class UserController extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("username");
-        UserBean user = userDB.getUserByUsername(username);
+        String userIDStr = request.getParameter("userID");
+        
+        if (userIDStr != null && !userIDStr.isEmpty()) {
+            int userID = Integer.parseInt(userIDStr);
+            UserBean user = userDB.getUserByID(userID);
 
-        if (user != null) {
-            request.setAttribute("user", user);
+            if (user != null) {
+                request.setAttribute("user", user);
 
-            ArrayList<LocationBean> locations = locationDB.queryLocation();
-            request.setAttribute("locations", locations);
+                ArrayList<LocationBean> locations = locationDB.queryLocation();
+                request.setAttribute("locations", locations);
 
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/management/editUser.jsp");
-            dispatcher.forward(request, response);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/management/editUser.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+            }
         } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID is required");
         }
     }
 

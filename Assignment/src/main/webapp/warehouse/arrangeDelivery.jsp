@@ -10,6 +10,7 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="ict.bean.ReservationBean"%>
 <%@page import="ict.db.ReservationDB"%>
+<%@page import="ict.db.LocationDB"%>
 
 <% 
     String dbUrl = application.getInitParameter("dbUrl");
@@ -18,6 +19,9 @@
     
     ReservationDB reservationDB = new ReservationDB(dbUrl, dbUser, dbPassword);
     ArrayList<ReservationBean> approvedReservations = reservationDB.getReservationsByStatus("approved");
+    
+    // Get the user's location ID for pre-selection
+    int userLocationID = user.getLocationID();
 %>
 
 <h1>Arrange Deliveries</h1>
@@ -66,31 +70,43 @@
 </table>
 
 <h2>Arrange New Delivery</h2>
-<form action="<%=request.getContextPath()%>/delivery" method="post">
+<form action="<%=request.getContextPath()%>/delivery" method="post" id="deliveryForm">
     <input type="hidden" name="action" value="add">
     
     <div class="form-group">
         <label for="sourceLocationID">Source Location:</label>
-        <loc:selector name="sourceLocationID" type="warehouse" required="true" />
+        <loc:selector name="sourceLocationID" id="sourceLocationID" type="warehouse" 
+                     cssClass="form-control" 
+                     required="true" 
+                     selectedValue="<%= String.valueOf(userLocationID) %>"
+                     onChange="validateLocations()" />
     </div>
     
     <div class="form-group">
         <label for="destinationLocationID">Destination Location:</label>
-        <loc:selector name="destinationLocationID" required="true" />
+        <loc:selector name="destinationLocationID" id="destinationLocationID" type="shop" 
+                     cssClass="form-control" 
+                     required="true"
+                     excludeIds="<%= String.valueOf(userLocationID) %>"
+                     onChange="validateLocations()" />
     </div>
     
     <div class="form-group">
         <label for="deliveryDate">Delivery Date:</label>
-        <input type="date" id="deliveryDate" name="deliveryDate" required>
+        <input type="date" id="deliveryDate" name="deliveryDate" class="form-control" required>
     </div>
     
     <div class="form-group">
         <label for="notes">Notes:</label>
-        <textarea id="notes" name="notes" rows="4"></textarea>
+        <textarea id="notes" name="notes" rows="4" class="form-control"></textarea>
+    </div>
+    
+    <div id="locationError" style="color: red; display: none; margin-bottom: 10px;">
+        Source and destination locations cannot be the same.
     </div>
     
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Arrange Delivery</button>
+        <button type="submit" class="btn" id="submitBtn">Arrange Delivery</button>
     </div>
 </form>
 
@@ -99,6 +115,38 @@
     var today = new Date();
     var todayFormatted = today.toISOString().split('T')[0];
     document.getElementById('deliveryDate').setAttribute('min', todayFormatted);
+    
+    // Validate that source and destination are different
+    function validateLocations() {
+        var sourceLocationID = document.getElementById('sourceLocationID').value;
+        var destinationLocationID = document.getElementById('destinationLocationID').value;
+        var errorDiv = document.getElementById('locationError');
+        var submitBtn = document.getElementById('submitBtn');
+        
+        if (sourceLocationID && destinationLocationID && sourceLocationID === destinationLocationID) {
+            errorDiv.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            errorDiv.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    }
+    
+    // Validate form on submit
+    document.getElementById('deliveryForm').addEventListener('submit', function(e) {
+        var sourceLocationID = document.getElementById('sourceLocationID').value;
+        var destinationLocationID = document.getElementById('destinationLocationID').value;
+        
+        if (sourceLocationID && destinationLocationID && sourceLocationID === destinationLocationID) {
+            e.preventDefault();
+            document.getElementById('locationError').style.display = 'block';
+            return false;
+        }
+        return true;
+    });
+    
+    // Initialize validation
+    validateLocations();
 </script>
 
 <%@include file="../footer.jsp"%>

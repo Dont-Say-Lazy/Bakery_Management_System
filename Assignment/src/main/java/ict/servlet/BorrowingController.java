@@ -12,6 +12,7 @@ import ict.bean.BorrowingBean;
 import ict.bean.FruitBean;
 import ict.bean.LocationBean;
 import ict.bean.UserBean;
+import ict.bean.StockBean;
 import ict.db.BorrowingDB;
 import ict.db.FruitDB;
 import ict.db.LocationDB;
@@ -102,6 +103,9 @@ public class BorrowingController extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                 }
                 break;
+            case "getShopStock":
+                getShopStock(request, response);
+                break;
             default:
                 listBorrowings(request, response, user);
         }
@@ -158,6 +162,15 @@ public class BorrowingController extends HttpServlet {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         
+        // Check if the source shop has enough stock
+        StockBean sourceStock = stockDB.getStockByLocationAndFruit(sourceShopID, fruitID);
+        
+        if (sourceStock == null || sourceStock.getQuantity() < quantity) {
+            request.setAttribute("message", "The source shop does not have enough stock for this borrowing request.");
+            showAddForm(request, response, user);
+            return;
+        }
+        
         // Create a new borrowing request
         BorrowingBean borrowing = new BorrowingBean();
         borrowing.setSourceShopID(sourceShopID);
@@ -209,16 +222,51 @@ public class BorrowingController extends HttpServlet {
             return;
         }
         
+        // Check if source shop still has enough stock
+        StockBean sourceStock = stockDB.getStockByLocationAndFruit(borrowing.getSourceShopID(), borrowing.getFruitID());
+        
+        if (sourceStock == null || sourceStock.getQuantity() < borrowing.getQuantity()) {
+            request.setAttribute("message", "Insufficient stock to approve this borrowing request.");
+            listBorrowings(request, response, user);
+            return;
+        }
+        
+        // Begin transaction by updating status
         boolean success = borrowingDB.updateBorrowingStatus(borrowingID, "approved");
         
         if (success) {
             // Update stock levels for both shops
-            // Reduce source shop stock
-            stockDB.updateStockQuantity(borrowing.getSourceShopID(), borrowing.getFruitID(), -borrowing.getQuantity());
-            // Increase destination shop stock
-            stockDB.updateStockQuantity(borrowing.getDestinationShopID(), borrowing.getFruitID(), borrowing.getQuantity());
+            boolean sourceUpdated = false;
+            boolean destUpdated = false;
             
-            request.setAttribute("message", "Borrowing request approved successfully.");
+            // Reduce source shop stock
+            int newSourceQuantity = sourceStock.getQuantity() - borrowing.getQuantity();
+            sourceStock.setQuantity(newSourceQuantity);
+            sourceUpdated = stockDB.updateStock(sourceStock);
+            
+            // Increase destination shop stock
+            StockBean destStock = stockDB.getStockByLocationAndFruit(borrowing.getDestinationShopID(), borrowing.getFruitID());
+            
+            if (destStock != null) {
+                // Update existing stock
+                int newDestQuantity = destStock.getQuantity() + borrowing.getQuantity();
+                destStock.setQuantity(newDestQuantity);
+                destUpdated = stockDB.updateStock(destStock);
+            } else {
+                // Create new stock entry
+                destStock = new StockBean();
+                destStock.setLocationID(borrowing.getDestinationShopID());
+                destStock.setFruitID(borrowing.getFruitID());
+                destStock.setQuantity(borrowing.getQuantity());
+                destUpdated = stockDB.addStock(destStock);
+            }
+            
+            if (sourceUpdated && destUpdated) {
+                request.setAttribute("message", "Borrowing request approved and stock updated successfully.");
+            } else {
+                // If stock update failed, we should log this and possibly rollback the status change
+                request.setAttribute("message", "Borrowing request approved but there was an issue updating stock levels.");
+            }
         } else {
             request.setAttribute("message", "Failed to approve borrowing request.");
         }
@@ -251,5 +299,52 @@ public class BorrowingController extends HttpServlet {
         }
         
         listBorrowings(request, response, user);
+    }
+    
+    private void getShopStock(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String shopIDStr = request.getParameter("shopID");
+        
+        if (shopIDStr == null || shopIDStr.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("[]");
+            return;
+        }
+        
+        int shopID = Integer.parseInt(shopIDStr);
+        
+        // Get the shop stock
+        ArrayList<StockBean> stocks = stockDB.queryStockByLocation(shopID);
+        
+        // Build JSON response
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[");
+        
+        boolean first = true;
+        for (StockBean stock : stocks) {
+            // Only include items with stock > 0
+            if (stock.getQuantity() <= 0) {
+                continue;
+            }
+            
+            if (!first) {
+                jsonBuilder.append(",");
+            }
+            
+            jsonBuilder.append("{");
+            jsonBuilder.append("\"fruitID\":").append(stock.getFruitID()).append(",");
+            jsonBuilder.append("\"fruitName\":\"").append(stock.getFruitName()).append("\",");
+            jsonBuilder.append("\"quantity\":").append(stock.getQuantity());
+            jsonBuilder.append("}");
+            
+            first = false;
+        }
+        
+        jsonBuilder.append("]");
+        
+        // Send the response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
     }
 }

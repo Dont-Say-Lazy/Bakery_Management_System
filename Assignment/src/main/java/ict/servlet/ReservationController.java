@@ -99,6 +99,16 @@ public class ReservationController extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                 }
                 break;
+            case "deliver":
+                if (role.equals("warehouse_staff")) {
+                    deliverReservation(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
+            case "getWarehouseStock":
+                getWarehouseStock(request, response);
+                break;
             default:
                 listReservations(request, response, user);
         }
@@ -153,9 +163,24 @@ public class ReservationController extends HttpServlet {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         String deliveryDateStr = request.getParameter("deliveryDate");
+        int warehouseID = Integer.parseInt(request.getParameter("warehouseID"));
         
         // Parse the delivery date
         Date deliveryDate = Date.valueOf(deliveryDateStr);
+        
+        // Validate warehouse has enough stock
+        String dbUrl = getServletContext().getInitParameter("dbUrl");
+        String dbUser = getServletContext().getInitParameter("dbUser");
+        String dbPassword = getServletContext().getInitParameter("dbPassword");
+        
+        ict.db.StockDB stockDB = new ict.db.StockDB(dbUrl, dbUser, dbPassword);
+        ict.bean.StockBean stock = stockDB.getStockByLocationAndFruit(warehouseID, fruitID);
+        
+        if (stock == null || stock.getQuantity() < quantity) {
+            request.setAttribute("message", "Insufficient stock available for this reservation.");
+            showAddForm(request, response);
+            return;
+        }
         
         // Create a new reservation
         ReservationBean reservation = new ReservationBean();
@@ -224,5 +249,76 @@ public class ReservationController extends HttpServlet {
         }
         
         listReservations(request, response, user);
+    }
+    
+    private void deliverReservation(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int reservationID = Integer.parseInt(request.getParameter("reservationID"));
+        HttpSession session = request.getSession();
+        UserBean user = (UserBean) session.getAttribute("userInfo");
+        
+        boolean success = reservationDB.updateReservationStatus(reservationID, "delivered");
+        
+        if (success) {
+            request.setAttribute("message", "Reservation marked as delivered successfully.");
+        } else {
+            request.setAttribute("message", "Failed to mark reservation as delivered.");
+        }
+        
+        // Redirect back to arrange delivery page
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/arrangeDelivery.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void getWarehouseStock(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String warehouseIDStr = request.getParameter("warehouseID");
+        
+        if (warehouseIDStr == null || warehouseIDStr.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("[]");
+            return;
+        }
+        
+        int warehouseID = Integer.parseInt(warehouseIDStr);
+        
+        // Get the warehouse stock
+        String dbUrl = getServletContext().getInitParameter("dbUrl");
+        String dbUser = getServletContext().getInitParameter("dbUser");
+        String dbPassword = getServletContext().getInitParameter("dbPassword");
+        
+        ict.db.StockDB stockDB = new ict.db.StockDB(dbUrl, dbUser, dbPassword);
+        ArrayList<ict.bean.StockBean> stocks = stockDB.queryStockByLocation(warehouseID);
+        
+        // Build JSON response
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[");
+        
+        boolean first = true;
+        for (ict.bean.StockBean stock : stocks) {
+            // Only include items with stock > 0
+            if (stock.getQuantity() <= 0) {
+                continue;
+            }
+            
+            if (!first) {
+                jsonBuilder.append(",");
+            }
+            
+            jsonBuilder.append("{");
+            jsonBuilder.append("\"fruitID\":").append(stock.getFruitID()).append(",");
+            jsonBuilder.append("\"fruitName\":\"").append(stock.getFruitName()).append("\",");
+            jsonBuilder.append("\"quantity\":").append(stock.getQuantity());
+            jsonBuilder.append("}");
+            
+            first = false;
+        }
+        
+        jsonBuilder.append("]");
+        
+        // Send the response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(jsonBuilder.toString());
     }
 }

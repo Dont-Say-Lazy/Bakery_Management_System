@@ -253,4 +253,47 @@ public class UserDB {
         
         return isSuccess;
     }
+    
+    public UserBean getUserByID(int userID) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        UserBean user = null;
+        
+        try {
+            conn = dbConnection.getConnection();
+            String preQueryStatement = "SELECT * FROM Users WHERE UserID=?";
+            pstmt = conn.prepareStatement(preQueryStatement);
+            pstmt.setInt(1, userID);
+            rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                user = new UserBean();
+                user.setUserID(rs.getInt("UserID"));
+                user.setUsername(rs.getString("Username"));
+                user.setPassword(rs.getString("Password"));
+                user.setRole(rs.getString("Role"));
+                user.setName(rs.getString("Name"));
+                user.setLocationID(rs.getInt("LocationID"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        return user;
+    }
 }

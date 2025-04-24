@@ -15,6 +15,8 @@ import ict.db.LocationDB;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -26,6 +28,9 @@ public class LocationSelectorTag extends SimpleTagSupport {
     private String id;
     private String selectedValue;
     private boolean required;
+    private String cssClass;
+    private String excludeIds;
+    private String onChange;
     
     public void setType(String type) {
         this.type = type;
@@ -47,6 +52,18 @@ public class LocationSelectorTag extends SimpleTagSupport {
         this.required = required;
     }
     
+    public void setCssClass(String cssClass) {
+        this.cssClass = cssClass;
+    }
+    
+    public void setExcludeIds(String excludeIds) {
+        this.excludeIds = excludeIds;
+    }
+    
+    public void setOnChange(String onChange) {
+        this.onChange = onChange;
+    }
+    
     @Override
     public void doTag() throws JspException, IOException {
         PageContext pageContext = (PageContext) getJspContext();
@@ -66,24 +83,58 @@ public class LocationSelectorTag extends SimpleTagSupport {
                 locations = locationDB.queryLocation();
             }
             
-            // Start select element
-            out.println("<select name=\"" + name + "\" id=\"" + (id != null ? id : name) + "\"" + (required ? " required" : "") + ">");
-            out.println("<option value=\"\">Select Location</option>");
+            // Process exclude IDs if provided
+            List<String> excludeIdList = new ArrayList<>();
+            if (excludeIds != null && !excludeIds.isEmpty()) {
+                excludeIdList = Arrays.asList(excludeIds.split(","));
+            }
+            
+            // Start select element with CSS classes and onChange handler
+            StringBuilder sb = new StringBuilder();
+            sb.append("<select name=\"").append(name).append("\" id=\"").append(id != null ? id : name).append("\"");
+            
+            if (required) {
+                sb.append(" required");
+            }
+            
+            if (cssClass != null && !cssClass.isEmpty()) {
+                sb.append(" class=\"").append(cssClass).append("\"");
+            }
+            
+            if (onChange != null && !onChange.isEmpty()) {
+                sb.append(" onchange=\"").append(onChange).append("\"");
+            }
+            
+            sb.append(">");
+            sb.append("<option value=\"\">Select Location</option>");
             
             // Add options from locations
             for (LocationBean location : locations) {
+                // Skip if this location ID is in the exclude list
+                if (excludeIdList.contains(String.valueOf(location.getLocationID()))) {
+                    continue;
+                }
+                
                 String selected = "";
                 if (selectedValue != null && selectedValue.equals(String.valueOf(location.getLocationID()))) {
                     selected = " selected";
                 }
                 
-                out.println("<option value=\"" + location.getLocationID() + "\"" + selected + ">" + 
-                            location.getName() + " (" + location.getCity() + ", " + location.getCountry() + ")</option>");
+                sb.append("<option value=\"").append(location.getLocationID()).append("\"")
+                  .append(selected)
+                  .append(" data-type=\"").append(location.getType()).append("\"")
+                  .append(" data-city=\"").append(location.getCity()).append("\"")
+                  .append(" data-country=\"").append(location.getCountry()).append("\"")
+                  .append(" data-source=\"").append(location.isIsSource()).append("\"")
+                  .append(">")
+                  .append(location.getName()).append(" (").append(location.getCity()).append(", ").append(location.getCountry()).append(")")
+                  .append("</option>");
             }
             
             // End select element
-            out.println("</select>");
+            sb.append("</select>");
             
+            out.println(sb.toString());
         } catch (Exception ex) {
             out.println("Error generating location selector: " + ex.getMessage());
         }
