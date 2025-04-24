@@ -292,4 +292,60 @@ public class ReservationDB {
         
         return isSuccess;
     }
+    
+    public ArrayList<ReservationBean> getReservationsByStatus(String status) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        ArrayList<ReservationBean> reservations = new ArrayList<>();
+        
+        try {
+            conn = dbConnection.getConnection();
+            String sql = "SELECT r.*, f.Name as FruitName, l.Name as ShopName, u.Name as UserName " +
+                         "FROM Reservations r " +
+                         "JOIN Fruits f ON r.FruitID = f.FruitID " +
+                         "JOIN Locations l ON r.ShopLocationID = l.LocationID " +
+                         "JOIN Users u ON r.UserID = u.UserID " +
+                         "WHERE r.Status = ? " +
+                         "ORDER BY r.RequestDate DESC";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, status);
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                ReservationBean reservation = new ReservationBean();
+                reservation.setReservationID(rs.getInt("ReservationID"));
+                reservation.setShopLocationID(rs.getInt("ShopLocationID"));
+                reservation.setFruitID(rs.getInt("FruitID"));
+                reservation.setQuantity(rs.getInt("Quantity"));
+                reservation.setRequestDate(rs.getDate("RequestDate"));
+                reservation.setDeliveryDate(rs.getDate("DeliveryDate"));
+                reservation.setStatus(rs.getString("Status"));
+                reservation.setUserID(rs.getInt("UserID"));
+                reservation.setFruitName(rs.getString("FruitName"));
+                reservation.setShopName(rs.getString("ShopName"));
+                reservation.setUserName(rs.getString("UserName"));
+                
+                reservations.add(reservation);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        return reservations;
+    }
 }

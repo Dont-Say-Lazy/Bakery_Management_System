@@ -55,7 +55,7 @@
 <div class="dashboard-section">
     <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
     <div class="quick-actions">
-        <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="action-card">
+        <a href="<%=request.getContextPath()%>/stock?/action=view" class="action-card">
             <div class="action-icon">
                 <i class="fas fa-sync-alt"></i>
             </div>

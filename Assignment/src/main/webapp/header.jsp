@@ -293,7 +293,7 @@
             <a href="<%=request.getContextPath()%>/warehouse/dashboard.jsp" class="<%= request.getRequestURI().endsWith("/warehouse/dashboard.jsp") ? "active" : "" %>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
-            <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="<%= request.getQueryString() != null && request.getQueryString().contains("action=showUpdateForm") ? "active" : "" %>">
+            <a href="<%=request.getContextPath()%>/stock?action=view" class="<%= request.getRequestURI().endsWith("/warehouse/updateStock.jsp") ? "active" : "" %>">
                 <i class="fas fa-sync-alt"></i> Update Stock
             </a>
             <a href="<%=request.getContextPath()%>/reservation?action=list" class="<%= request.getQueryString() != null && request.getQueryString().contains("action=list") && request.getRequestURL().toString().contains("/reservation") ? "active" : "" %>">
