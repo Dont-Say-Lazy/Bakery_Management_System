@@ -82,6 +82,7 @@ public class UserDB {
                 user.setRole(rs.getString("Role"));
                 user.setName(rs.getString("Name"));
                 user.setLocationID(rs.getInt("LocationID"));
+                user.setIsCentralStaff(rs.getInt("IsCentralStaff"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -124,6 +125,7 @@ public class UserDB {
                 user.setRole(rs.getString("Role"));
                 user.setName(rs.getString("Name"));
                 user.setLocationID(rs.getInt("LocationID"));
+                user.setIsCentralStaff(rs.getInt("IsCentralStaff"));
                 users.add(user);
             }
         } catch (SQLException ex) {
@@ -154,13 +156,14 @@ public class UserDB {
 
         try {
             conn = dbConnection.getConnection();
-            String preQueryStatement = "INSERT INTO Users (Username, Password, Role, Name, LocationID) VALUES (?,?,?,?,?)";
+            String preQueryStatement = "INSERT INTO Users (Username, Password, Role, Name, LocationID, IsCentralStaff) VALUES (?,?,?,?,?,?)";
             pstmt = conn.prepareStatement(preQueryStatement);
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
             pstmt.setString(3, user.getRole());
             pstmt.setString(4, user.getName());
             pstmt.setInt(5, user.getLocationID());
+            pstmt.setInt(6, user.getIsCentralStaff());
 
             int rowCount = pstmt.executeUpdate();
             if (rowCount >= 1) {
@@ -191,14 +194,15 @@ public class UserDB {
 
         try {
             conn = dbConnection.getConnection();
-            String preQueryStatement = "UPDATE Users SET Username=?, Password=?, Role=?, Name=?, LocationID=? WHERE UserID=?";
+            String preQueryStatement = "UPDATE Users SET Username=?, Password=?, Role=?, Name=?, LocationID=?, IsCentralStaff=? WHERE UserID=?";
             pstmt = conn.prepareStatement(preQueryStatement);
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
             pstmt.setString(3, user.getRole());
             pstmt.setString(4, user.getName());
             pstmt.setInt(5, user.getLocationID());
-            pstmt.setInt(6, user.getUserID());
+            pstmt.setInt(6, user.getIsCentralStaff());
+            pstmt.setInt(7, user.getUserID());
 
             int rowCount = pstmt.executeUpdate();
             if (rowCount >= 1) {
@@ -276,6 +280,7 @@ public class UserDB {
                 user.setRole(rs.getString("Role"));
                 user.setName(rs.getString("Name"));
                 user.setLocationID(rs.getInt("LocationID"));
+                user.setIsCentralStaff(rs.getInt("IsCentralStaff"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

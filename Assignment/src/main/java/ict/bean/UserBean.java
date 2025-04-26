@@ -18,6 +18,7 @@ public class UserBean implements Serializable {
     private String role;
     private String name;
     private int locationID;
+    private int isCentralStaff;
 
     // Default constructor
     public UserBean() {
@@ -70,5 +71,13 @@ public class UserBean implements Serializable {
 
     public void setLocationID(int locationID) {
         this.locationID = locationID;
+    }
+    
+    public int getIsCentralStaff() {
+        return isCentralStaff;
+    }
+    
+    public void setIsCentralStaff(int isCentralStaff) {
+        this.isCentralStaff = isCentralStaff;
     }
 }

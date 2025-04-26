@@ -10,6 +10,7 @@ package ict.tag;
  */
 
 import ict.bean.LocationBean;
+import ict.bean.UserBean;
 import ict.db.DBConnection;
 import ict.db.LocationDB;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
@@ -31,6 +33,7 @@ public class LocationSelectorTag extends SimpleTagSupport {
     private String cssClass;
     private String excludeIds;
     private String onChange;
+    private String selectorType; // "source" or "destination"
     
     public void setType(String type) {
         this.type = type;
@@ -64,6 +67,10 @@ public class LocationSelectorTag extends SimpleTagSupport {
         this.onChange = onChange;
     }
     
+    public void setSelectorType(String selectorType) {
+        this.selectorType = selectorType;
+    }
+    
     @Override
     public void doTag() throws JspException, IOException {
         PageContext pageContext = (PageContext) getJspContext();
@@ -77,10 +84,31 @@ public class LocationSelectorTag extends SimpleTagSupport {
             LocationDB locationDB = new LocationDB(dbUrl, dbUser, dbPassword);
             ArrayList<LocationBean> locations;
             
-            if (type != null && !type.isEmpty()) {
-                locations = locationDB.queryLocationsByType(type);
+            // Get user from session
+            HttpSession session = pageContext.getSession();
+            UserBean user = (UserBean) session.getAttribute("userInfo");
+            
+            if (user != null) {
+                int userLocationID = user.getLocationID();
+                boolean isCentralStaff = user.getIsCentralStaff() == 1;
+                
+                // Get locations based on user role and selector type
+                if ("source".equals(selectorType)) {
+                    locations = locationDB.querySourceLocationsForUser(userLocationID, isCentralStaff);
+                } else if ("destination".equals(selectorType)) {
+                    locations = locationDB.queryDestinationLocationsForUser(userLocationID, isCentralStaff);
+                } else if (type != null && !type.isEmpty()) {
+                    locations = locationDB.queryLocationsByType(type);
+                } else {
+                    locations = locationDB.queryLocation();
+                }
             } else {
-                locations = locationDB.queryLocation();
+                // Fallback to regular behavior if user not in session
+                if (type != null && !type.isEmpty()) {
+                    locations = locationDB.queryLocationsByType(type);
+                } else {
+                    locations = locationDB.queryLocation();
+                }
             }
             
             // Process exclude IDs if provided

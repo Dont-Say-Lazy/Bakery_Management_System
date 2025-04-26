@@ -303,4 +303,114 @@ public class LocationDB {
         
         return isSuccess;
     }
+    
+    // Method to query source locations based on central staff status
+    public ArrayList<LocationBean> querySourceLocationsForUser(int userLocationID, boolean isCentralStaff) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        ArrayList<LocationBean> locations = new ArrayList<>();
+        
+        try {
+            conn = dbConnection.getConnection();
+            String preQueryStatement;
+            
+            if (isCentralStaff) {
+                // Central staff can only select their own central warehouse as source
+                preQueryStatement = "SELECT * FROM Locations WHERE LocationID = ?";
+                pstmt = conn.prepareStatement(preQueryStatement);
+                pstmt.setInt(1, userLocationID);
+            } else {
+                // Regular staff can select any warehouse
+                preQueryStatement = "SELECT * FROM Locations WHERE Type = 'warehouse' OR Type = 'central_warehouse'";
+                pstmt = conn.prepareStatement(preQueryStatement);
+            }
+            
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                LocationBean location = new LocationBean();
+                location.setLocationID(rs.getInt("LocationID"));
+                location.setName(rs.getString("Name"));
+                location.setCity(rs.getString("City"));
+                location.setCountry(rs.getString("Country"));
+                location.setType(rs.getString("Type"));
+                location.setIsSource(rs.getBoolean("IsSource"));
+                locations.add(location);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        return locations;
+    }
+    
+    // Method to query destination locations based on central staff status
+    public ArrayList<LocationBean> queryDestinationLocationsForUser(int userLocationID, boolean isCentralStaff) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        ArrayList<LocationBean> locations = new ArrayList<>();
+        
+        try {
+            conn = dbConnection.getConnection();
+            String preQueryStatement;
+            
+            if (isCentralStaff) {
+                // Central staff can select any shop or any warehouse except their own
+                preQueryStatement = "SELECT * FROM Locations WHERE LocationID != ? AND (Type = 'shop' OR Type = 'warehouse')";
+                pstmt = conn.prepareStatement(preQueryStatement);
+                pstmt.setInt(1, userLocationID);
+            } else {
+                // Regular staff can select any shop
+                preQueryStatement = "SELECT * FROM Locations WHERE Type = 'shop'";
+                pstmt = conn.prepareStatement(preQueryStatement);
+            }
+            
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                LocationBean location = new LocationBean();
+                location.setLocationID(rs.getInt("LocationID"));
+                location.setName(rs.getString("Name"));
+                location.setCity(rs.getString("City"));
+                location.setCountry(rs.getString("Country"));
+                location.setType(rs.getString("Type"));
+                location.setIsSource(rs.getBoolean("IsSource"));
+                locations.add(location);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        return locations;
+    }
 }

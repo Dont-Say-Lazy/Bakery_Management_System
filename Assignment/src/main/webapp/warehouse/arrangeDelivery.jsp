@@ -22,6 +22,7 @@
     
     // Get the user's location ID for pre-selection
     int userLocationID = user.getLocationID();
+    boolean isCentralStaff = user.getIsCentralStaff() == 1;
 %>
 
 <h1>Arrange Deliveries</h1>
@@ -75,19 +76,21 @@
     
     <div class="form-group">
         <label for="sourceLocationID">Source Location:</label>
-        <loc:selector name="sourceLocationID" id="sourceLocationID" type="warehouse" 
+        <loc:selector name="sourceLocationID" id="sourceLocationID" 
                      cssClass="form-control" 
                      required="true" 
                      selectedValue="<%= String.valueOf(userLocationID) %>"
+                     selectorType="source"
                      onChange="validateLocations()" />
     </div>
     
     <div class="form-group">
         <label for="destinationLocationID">Destination Location:</label>
-        <loc:selector name="destinationLocationID" id="destinationLocationID" type="shop" 
+        <loc:selector name="destinationLocationID" id="destinationLocationID" 
                      cssClass="form-control" 
                      required="true"
                      excludeIds="<%= String.valueOf(userLocationID) %>"
+                     selectorType="destination"
                      onChange="validateLocations()" />
     </div>
     
