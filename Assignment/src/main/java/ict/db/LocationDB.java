@@ -315,16 +315,12 @@ public class LocationDB {
             conn = dbConnection.getConnection();
             String preQueryStatement;
             
-            if (isCentralStaff) {
-                // Central staff can only select their own central warehouse as source
-                preQueryStatement = "SELECT * FROM Locations WHERE LocationID = ?";
-                pstmt = conn.prepareStatement(preQueryStatement);
-                pstmt.setInt(1, userLocationID);
-            } else {
-                // Regular staff can select any warehouse
-                preQueryStatement = "SELECT * FROM Locations WHERE Type = 'warehouse' OR Type = 'central_warehouse'";
-                pstmt = conn.prepareStatement(preQueryStatement);
-            }
+            // Modified logic:
+            // - Central staff can only select their own central warehouse as source
+            // - Regular warehouse staff can only select their own warehouse as source
+            preQueryStatement = "SELECT * FROM Locations WHERE LocationID = ?";
+            pstmt = conn.prepareStatement(preQueryStatement);
+            pstmt.setInt(1, userLocationID);
             
             rs = pstmt.executeQuery();
             
@@ -371,13 +367,13 @@ public class LocationDB {
             String preQueryStatement;
             
             if (isCentralStaff) {
-                // Central staff can select any shop or any warehouse except their own
+                // Central staff can select any warehouse or shop except their own
                 preQueryStatement = "SELECT * FROM Locations WHERE LocationID != ? AND (Type = 'shop' OR Type = 'warehouse')";
                 pstmt = conn.prepareStatement(preQueryStatement);
                 pstmt.setInt(1, userLocationID);
             } else {
-                // Regular staff can select any shop
-                preQueryStatement = "SELECT * FROM Locations WHERE Type = 'shop'";
+                // Regular warehouse staff can select any shop or central warehouse
+                preQueryStatement = "SELECT * FROM Locations WHERE Type = 'shop' OR Type = 'central_warehouse'";
                 pstmt = conn.prepareStatement(preQueryStatement);
             }
             
