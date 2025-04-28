@@ -42,8 +42,8 @@
                 <select id="role" name="role" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
                     <option value="">All Roles</option>
                     <option value="senior_management" ${filterRole == 'senior_management' ? 'selected' : ''}>Senior Management</option>
-                    <option value="shop_manager" ${filterRole == 'shop_manager' ? 'selected' : ''}>Shop Manager</option>
                     <option value="warehouse_staff" ${filterRole == 'warehouse_staff' ? 'selected' : ''}>Warehouse Staff</option>
+                    <option value="shop_staff" ${filterRole == 'shop_staff' ? 'selected' : ''}>Shop Staff</option>
                 </select>
             </div>
             <div style="flex: 1; min-width: 200px;">

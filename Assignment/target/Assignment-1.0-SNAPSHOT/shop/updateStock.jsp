@@ -32,13 +32,15 @@
                 <label for="fruitName" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit Name:</label>
                 <input type="text" id="fruitName" name="fruitName" value="${filterFruitName}" placeholder="Filter by fruit name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <div style="flex: 1; min-width: 200px;">
-                <label for="quantityMin" style="display: block; margin-bottom: 5px; font-weight: bold;">Min Quantity:</label>
-                <input type="number" id="quantityMin" name="quantityMin" value="${filterQuantityMin}" placeholder="Minimum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-            </div>
-            <div style="flex: 1; min-width: 200px;">
-                <label for="quantityMax" style="display: block; margin-bottom: 5px; font-weight: bold;">Max Quantity:</label>
-                <input type="number" id="quantityMax" name="quantityMax" value="${filterQuantityMax}" placeholder="Maximum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <div style="flex: 2; min-width: 200px; display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label for="quantityMin" style="display: block; margin-bottom: 5px; font-weight: bold;">Min Quantity:</label>
+                    <input type="number" id="quantityMin" name="quantityMin" value="${filterQuantityMin}" placeholder="Minimum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div style="flex: 1;">
+                    <label for="quantityMax" style="display: block; margin-bottom: 5px; font-weight: bold;">Max Quantity:</label>
+                    <input type="number" id="quantityMax" name="quantityMax" value="${filterQuantityMax}" placeholder="Maximum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
             </div>
             <div style="flex-basis: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
                 <button type="submit" class="btn" style="background-color: #4CAF50; color: white; margin-right: 10px;">Apply Filter</button>
