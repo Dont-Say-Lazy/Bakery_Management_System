@@ -50,8 +50,8 @@
             <input type="number" id="quickQuantity" name="quantity" min="1" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
         </div>
         <div style="flex: 1; min-width: 120px; display: flex; gap: 10px;">
-            <button type="submit" name="action" value="checkIn" class="btn" style="flex: 1; background-color: #f8f9fa; color: #28a745; border: 1px solid #28a745;">Check In</button>
-            <button type="submit" name="action" value="checkOut" class="btn" style="flex: 1; background-color: #f8f9fa; color: #dc3545; border: 1px solid #dc3545;">Check Out</button>
+            <button type="submit" name="action" value="checkIn" class="btn" style="flex: 1; background-color: #28a745; color: white;">Check In</button>
+            <button type="submit" name="action" value="checkOut" class="btn" style="flex: 1; background-color: #dc3545; color: white;">Check Out</button>
         </div>
     </form>
 </div>
@@ -77,8 +77,8 @@
                 </div>
             </div>
             <div style="flex-basis: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
-                <button type="submit" class="btn" style="background-color: #f8f9fa; color: #4CAF50; border: 1px solid #4CAF50; margin-right: 10px;">Apply Filter</button>
-                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #f8f9fa; color: #f44336; border: 1px solid #f44336;">Clear Filter</a>
+                <button type="submit" class="btn" style="background-color: #4CAF50; color: white; margin-right: 10px;">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #f44336; color: white;">Clear Filter</a>
             </div>
         </div>
     </form>
@@ -106,14 +106,14 @@
                 <td><%= stock.getQuantity() %></td>
                 <td><%= stock.getLastUpdated() %></td>
                 <td style="display: flex; gap: 5px;">
-                    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn" style="background-color: #f8f9fa; color: #333; border: 1px solid #ccc;">Update</a>
+                    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn" style="background-color: #6c757d; color: white;">Update</a>
                     
                     <!-- Check-in button with form -->
                     <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">
                         <input type="hidden" name="action" value="checkIn">
                         <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn" style="background-color: #f8f9fa; color: #28a745; border: 1px solid #28a745;">+</button>
+                        <button type="submit" class="btn" style="background-color: #28a745; color: white;">+</button>
                     </form>
                     
                     <!-- Check-out button with form -->
@@ -121,7 +121,7 @@
                         <input type="hidden" name="action" value="checkOut">
                         <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn" style="background-color: #f8f9fa; color: #dc3545; border: 1px solid #dc3545;" <%= stock.getQuantity() < 1 ? "disabled" : "" %>>-</button>
+                        <button type="submit" class="btn" style="background-color: #dc3545; color: white;" <%= stock.getQuantity() < 1 ? "disabled" : "" %>>-</button>
                     </form>
                 </td>
             </tr>

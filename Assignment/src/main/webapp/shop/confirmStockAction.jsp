@@ -49,8 +49,8 @@
     <input type="hidden" name="quantity" value="<%= quantity %>">
     <input type="hidden" name="confirmed" value="true">
     
-    <button type="submit" class="btn" style="background-color: #f8f9fa; color: #28a745; border: 1px solid #28a745;">Confirm <%= actionLabel %></button>
-    <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #f8f9fa; color: #dc3545; border: 1px solid #dc3545;">Cancel</a>
+    <button type="submit" class="btn" style="background-color: #28a745; color: white;">Confirm <%= actionLabel %></button>
+    <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white;">Cancel</a>
 </form>
 
 <%@include file="../footer.jsp"%> 

@@ -61,8 +61,8 @@
         </div>
 
         <div style="margin-top: 20px;">
-            <button type="submit" class="btn" style="background-color: #f8f9fa; color: #4CAF50; border: 1px solid #4CAF50;">Update Stock</button>
-            <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #f8f9fa; color: #333; border: 1px solid #ccc;">Cancel</a>
+            <button type="submit" class="btn" style="background-color: #4CAF50; color: white;">Update Stock</button>
+            <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #6c757d; color: white;">Cancel</a>
         </div>
     </form>
 </div>
