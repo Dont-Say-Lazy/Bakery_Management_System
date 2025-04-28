@@ -24,31 +24,31 @@
 </div>
 
 <!-- Filter Form -->
-<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-    <h3>Filter Users</h3>
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Filter Users</h3>
     <form action="<%=request.getContextPath()%>/user" method="get">
         <input type="hidden" name="action" value="filter">
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="${filterUsername}" placeholder="Filter by username">
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="username" style="display: block; margin-bottom: 5px; font-weight: bold;">Username:</label>
+                <input type="text" id="username" name="username" value="${filterUsername}" placeholder="Filter by username" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <div>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <div>
-                <label for="role">Role:</label>
-                <select id="role" name="role">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="role" style="display: block; margin-bottom: 5px; font-weight: bold;">Role:</label>
+                <select id="role" name="role" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
                     <option value="">All Roles</option>
                     <option value="senior_management" ${filterRole == 'senior_management' ? 'selected' : ''}>Senior Management</option>
                     <option value="shop_manager" ${filterRole == 'shop_manager' ? 'selected' : ''}>Shop Manager</option>
                     <option value="warehouse_staff" ${filterRole == 'warehouse_staff' ? 'selected' : ''}>Warehouse Staff</option>
                 </select>
             </div>
-            <div>
-                <label for="locationID">Location:</label>
-                <select id="locationID" name="locationID">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="locationID" style="display: block; margin-bottom: 5px; font-weight: bold;">Location:</label>
+                <select id="locationID" name="locationID" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: white;">
                     <option value="0">All Locations</option>
                     <%
                         ArrayList<LocationBean> filterLocations = (ArrayList<LocationBean>) request.getAttribute("locations");
@@ -64,9 +64,9 @@
                     %>
                 </select>
             </div>
-            <div style="align-self: flex-end;">
-                <button type="submit" class="btn">Apply Filter</button>
-                <a href="<%=request.getContextPath()%>/user?action=list" class="btn">Clear Filter</a>
+            <div style="flex-basis: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="btn" style="background-color: #4CAF50; color: white; margin-right: 10px;">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/user?action=list" class="btn" style="background-color: #f44336; color: white;">Clear Filter</a>
             </div>
         </div>
     </form>

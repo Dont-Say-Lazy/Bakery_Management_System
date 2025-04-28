@@ -23,22 +23,22 @@
 </div>
 
 <!-- Filter Form -->
-<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-    <h3>Filter Fruits</h3>
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Filter Fruits</h3>
     <form action="<%=request.getContextPath()%>/fruit" method="get">
         <input type="hidden" name="action" value="filter">
-        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name">
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <div>
-                <label for="sourceCountry">Source Country:</label>
-                <input type="text" id="sourceCountry" name="sourceCountry" value="${filterSourceCountry}" placeholder="Filter by country">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="sourceCountry" style="display: block; margin-bottom: 5px; font-weight: bold;">Source Country:</label>
+                <input type="text" id="sourceCountry" name="sourceCountry" value="${filterSourceCountry}" placeholder="Filter by country" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
-            <div style="align-self: flex-end;">
-                <button type="submit" class="btn">Apply Filter</button>
-                <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn">Clear Filter</a>
+            <div style="flex-basis: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="btn" style="background-color: #4CAF50; color: white; margin-right: 10px;">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn" style="background-color: #f44336; color: white;">Clear Filter</a>
             </div>
         </div>
     </form>
