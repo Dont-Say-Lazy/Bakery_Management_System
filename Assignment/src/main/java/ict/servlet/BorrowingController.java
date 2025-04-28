@@ -113,6 +113,30 @@ public class BorrowingController extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                 }
                 break;
+            case "confirmAdd":
+                confirmAdd(request, response, user);
+                break;
+            case "confirmApprove":
+                if (role.equals("shop_staff")) {
+                    confirmApprove(request, response, user);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
+            case "confirmReject":
+                if (role.equals("shop_staff")) {
+                    confirmReject(request, response, user);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
+            case "confirmMarkReceived":
+                if (role.equals("shop_staff")) {
+                    confirmMarkReceived(request, response, user);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
             case "getShopStock":
                 getShopStock(request, response);
                 break;
@@ -469,6 +493,131 @@ public class BorrowingController extends HttpServlet {
         request.setAttribute("filterEndDate", endDate);
         
         RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/borrowFruit.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmAdd(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int sourceShopID = Integer.parseInt(request.getParameter("sourceShopID"));
+        int fruitID = Integer.parseInt(request.getParameter("fruitID"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("sourceShopID", sourceShopID);
+        request.setAttribute("fruitID", fruitID);
+        request.setAttribute("quantity", quantity);
+        
+        // Get fruit and shop names for display
+        FruitBean fruit = fruitDB.getFruitByID(fruitID);
+        LocationBean sourceShop = locationDB.getLocationByID(sourceShopID);
+        LocationBean destShop = locationDB.getLocationByID(user.getLocationID());
+        
+        if (fruit != null) {
+            request.setAttribute("fruitName", fruit.getName());
+        }
+        
+        if (sourceShop != null) {
+            request.setAttribute("sourceShopName", sourceShop.getName());
+        }
+        
+        if (destShop != null) {
+            request.setAttribute("destShopName", destShop.getName());
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmAddBorrowing.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmApprove(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int borrowingID = Integer.parseInt(request.getParameter("borrowingID"));
+        
+        // Get borrowing details for confirmation page
+        BorrowingBean borrowing = borrowingDB.getBorrowingByID(borrowingID);
+        request.setAttribute("borrowing", borrowing);
+        
+        if (borrowing != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(borrowing.getFruitID());
+            LocationBean sourceShop = locationDB.getLocationByID(borrowing.getSourceShopID());
+            LocationBean destShop = locationDB.getLocationByID(borrowing.getDestinationShopID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (sourceShop != null) {
+                request.setAttribute("sourceShopName", sourceShop.getName());
+            }
+            
+            if (destShop != null) {
+                request.setAttribute("destShopName", destShop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmApproveBorrowing.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmReject(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int borrowingID = Integer.parseInt(request.getParameter("borrowingID"));
+        
+        // Get borrowing details for confirmation page
+        BorrowingBean borrowing = borrowingDB.getBorrowingByID(borrowingID);
+        request.setAttribute("borrowing", borrowing);
+        
+        if (borrowing != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(borrowing.getFruitID());
+            LocationBean sourceShop = locationDB.getLocationByID(borrowing.getSourceShopID());
+            LocationBean destShop = locationDB.getLocationByID(borrowing.getDestinationShopID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (sourceShop != null) {
+                request.setAttribute("sourceShopName", sourceShop.getName());
+            }
+            
+            if (destShop != null) {
+                request.setAttribute("destShopName", destShop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmRejectBorrowing.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmMarkReceived(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int borrowingID = Integer.parseInt(request.getParameter("borrowingID"));
+        
+        // Get borrowing details for confirmation page
+        BorrowingBean borrowing = borrowingDB.getBorrowingByID(borrowingID);
+        request.setAttribute("borrowing", borrowing);
+        
+        if (borrowing != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(borrowing.getFruitID());
+            LocationBean sourceShop = locationDB.getLocationByID(borrowing.getSourceShopID());
+            LocationBean destShop = locationDB.getLocationByID(borrowing.getDestinationShopID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (sourceShop != null) {
+                request.setAttribute("sourceShopName", sourceShop.getName());
+            }
+            
+            if (destShop != null) {
+                request.setAttribute("destShopName", destShop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmMarkReceivedBorrowing.jsp");
         dispatcher.forward(request, response);
     }
 }

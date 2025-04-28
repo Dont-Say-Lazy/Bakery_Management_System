@@ -56,7 +56,7 @@
             <td><%= reservation.getDeliveryDate() %></td>
             <td><%= reservation.getStatus() %></td>
             <td>
-                <a href="<%=request.getContextPath()%>/reservation?action=deliver&reservationID=<%= reservation.getReservationID() %>" class="btn" style="background-color: blue;">Mark as Delivered</a>
+                <a href="<%=request.getContextPath()%>/reservation?action=confirmDeliver&reservationID=<%= reservation.getReservationID() %>" class="btn" style="background-color: blue;">Mark as Delivered</a>
             </td>
         </tr>
         <% 

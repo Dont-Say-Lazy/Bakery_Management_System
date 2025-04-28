@@ -109,6 +109,30 @@ public class ReservationController extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                 }
                 break;
+            case "confirmAdd":
+                confirmAdd(request, response, user);
+                break;
+            case "confirmApprove":
+                if (role.equals("warehouse_staff")) {
+                    confirmApprove(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
+            case "confirmReject":
+                if (role.equals("warehouse_staff")) {
+                    confirmReject(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
+            case "confirmDeliver":
+                if (role.equals("warehouse_staff")) {
+                    confirmDeliver(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                }
+                break;
             case "getWarehouseStock":
                 getWarehouseStock(request, response);
                 break;
@@ -438,6 +462,113 @@ public class ReservationController extends HttpServlet {
         }
         
         RequestDispatcher dispatcher = request.getRequestDispatcher(destination);
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmAdd(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        int fruitID = Integer.parseInt(request.getParameter("fruitID"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        String deliveryDateStr = request.getParameter("deliveryDate");
+        int warehouseID = Integer.parseInt(request.getParameter("warehouseID"));
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("fruitID", fruitID);
+        request.setAttribute("quantity", quantity);
+        request.setAttribute("deliveryDate", deliveryDateStr);
+        request.setAttribute("warehouseID", warehouseID);
+        
+        // Get fruit and warehouse name for display
+        FruitBean fruit = fruitDB.getFruitByID(fruitID);
+        LocationBean warehouse = locationDB.getLocationByID(warehouseID);
+        
+        if (fruit != null) {
+            request.setAttribute("fruitName", fruit.getName());
+        }
+        
+        if (warehouse != null) {
+            request.setAttribute("warehouseName", warehouse.getName());
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmReserveFruit.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmApprove(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int reservationID = Integer.parseInt(request.getParameter("reservationID"));
+        
+        // Get reservation details for confirmation page
+        ReservationBean reservation = reservationDB.getReservationByID(reservationID);
+        request.setAttribute("reservation", reservation);
+        
+        if (reservation != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(reservation.getFruitID());
+            LocationBean shop = locationDB.getLocationByID(reservation.getShopLocationID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (shop != null) {
+                request.setAttribute("shopName", shop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmApproveReservation.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmReject(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int reservationID = Integer.parseInt(request.getParameter("reservationID"));
+        
+        // Get reservation details for confirmation page
+        ReservationBean reservation = reservationDB.getReservationByID(reservationID);
+        request.setAttribute("reservation", reservation);
+        
+        if (reservation != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(reservation.getFruitID());
+            LocationBean shop = locationDB.getLocationByID(reservation.getShopLocationID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (shop != null) {
+                request.setAttribute("shopName", shop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmRejectReservation.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmDeliver(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int reservationID = Integer.parseInt(request.getParameter("reservationID"));
+        
+        // Get reservation details for confirmation page
+        ReservationBean reservation = reservationDB.getReservationByID(reservationID);
+        request.setAttribute("reservation", reservation);
+        
+        if (reservation != null) {
+            // Get additional details
+            FruitBean fruit = fruitDB.getFruitByID(reservation.getFruitID());
+            LocationBean shop = locationDB.getLocationByID(reservation.getShopLocationID());
+            
+            if (fruit != null) {
+                request.setAttribute("fruitName", fruit.getName());
+            }
+            
+            if (shop != null) {
+                request.setAttribute("shopName", shop.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmDeliverReservation.jsp");
         dispatcher.forward(request, response);
     }
 }

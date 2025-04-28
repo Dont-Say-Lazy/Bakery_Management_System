@@ -108,7 +108,7 @@
             <td><span style="<%= statusClass %>"><%= status %></span></td>
             <td>
                 <% if (status.equals("approved")) { %>
-                    <a href="<%=request.getContextPath()%>/borrowing?action=markReceived&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: blue;">Mark as Received</a>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=confirmMarkReceived&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: blue;">Mark as Received</a>
                 <% } else { %>
                     -
                 <% } %>
@@ -173,8 +173,8 @@
             <td><span style="<%= statusClass %>"><%= status %></span></td>
             <td>
                 <% if (status.equals("pending")) { %>
-                    <a href="<%=request.getContextPath()%>/borrowing?action=approve&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: green;">Approve</a>
-                    <a href="<%=request.getContextPath()%>/borrowing?action=reject&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn btn-danger">Reject</a>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=confirmApprove&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn" style="background-color: green;">Approve</a>
+                    <a href="<%=request.getContextPath()%>/borrowing?action=confirmReject&borrowingID=<%= borrowing.getBorrowingID() %>" class="btn btn-danger">Reject</a>
                 <% } else { %>
                     <span>Processed</span>
                 <% } %>

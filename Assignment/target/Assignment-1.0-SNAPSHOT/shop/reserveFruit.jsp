@@ -31,7 +31,7 @@
 <% } %>
 
 <form action="<%=request.getContextPath()%>/reservation" method="post" id="reservationForm">
-    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="action" value="confirmAdd">
     
     <div class="form-group">
         <label for="warehouseID">Source Warehouse:</label>

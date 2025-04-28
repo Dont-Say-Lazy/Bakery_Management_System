@@ -98,8 +98,8 @@
             <td><%= reservation.getDeliveryDate() %></td>
             <td><%= reservation.getUserName() %></td>
             <td>
-                <a href="<%=request.getContextPath()%>/reservation?action=approve&reservationID=<%= reservation.getReservationID() %>" class="btn" style="background-color: green;">Approve</a>
-                <a href="<%=request.getContextPath()%>/reservation?action=reject&reservationID=<%= reservation.getReservationID() %>" class="btn btn-danger">Reject</a>
+                <a href="<%=request.getContextPath()%>/reservation?action=confirmApprove&reservationID=<%= reservation.getReservationID() %>" class="btn" style="background-color: green;">Approve</a>
+                <a href="<%=request.getContextPath()%>/reservation?action=confirmReject&reservationID=<%= reservation.getReservationID() %>" class="btn btn-danger">Reject</a>
             </td>
         </tr>
         <% 

@@ -20,7 +20,7 @@
 <% } %>
 
 <form action="<%=request.getContextPath()%>/borrowing" method="post" id="borrowingForm">
-    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="action" value="confirmAdd">
     
     <div class="form-group">
         <label for="sourceShopID">Source Shop:</label>
