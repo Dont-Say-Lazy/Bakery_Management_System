@@ -23,7 +23,7 @@
 <% } %>
 
 <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="btn">Update Stock</a>
+    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="btn" style="background-color: #4CAF50; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px;">Update Stock</a>
 </div>
 
 <!-- Quick Stock Adjustment Form -->
@@ -106,7 +106,7 @@
                 <td><%= stock.getQuantity() %></td>
                 <td><%= stock.getLastUpdated() %></td>
                 <td style="display: flex; gap: 5px;">
-                    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn" style="background-color: #6c757d; color: white;">Update</a>
+                    <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn" style="background-color: #6c757d; color: white; text-decoration: none;">Update</a>
                     
                     <!-- Check-in button with form -->
                     <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">

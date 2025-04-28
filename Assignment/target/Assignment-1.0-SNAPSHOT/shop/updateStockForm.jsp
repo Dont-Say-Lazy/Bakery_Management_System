@@ -56,32 +56,60 @@
             }
         }
         int change = (currentStock != null) ? newQuantity - currentStock.getQuantity() : newQuantity;
+        
+        // Check if this is the first step (edit form) or second step (confirmation)
+        boolean isConfirmStep = request.getParameter("step") != null && request.getParameter("step").equals("confirm");
     %>
 
     <% if (fruitID > 0 && currentStock != null) { %>
-    <div style="background-color: #FFF8E1; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="margin-top: 0; color: #8B6914; font-size: 1.3em;">Please Confirm</h3>
-        <p>You are about to update the stock of <strong><%= fruitName %></strong>:</p>
-        <ul style="padding-left: 20px;">
-            <li>Current quantity: <strong><%= currentStock.getQuantity() %></strong></li>
-            <li>New quantity: <strong><%= newQuantity %></strong></li>
-            <li>Change: <strong><%= change %></strong> units</li>
-        </ul>
-        <p>Are you sure you want to proceed with this update?</p>
-    </div>
+        <% if (isConfirmStep) { %>
+            <!-- Confirmation step -->
+            <div style="background-color: #FFF8E1; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; color: #8B6914; font-size: 1.3em;">Please Confirm</h3>
+                <p>You are about to update the stock of <strong><%= fruitName %></strong>:</p>
+                <ul style="padding-left: 20px;">
+                    <li>Current quantity: <strong><%= currentStock.getQuantity() %></strong></li>
+                    <li>New quantity: <strong><%= newQuantity %></strong></li>
+                    <li>Change: <strong><%= change %></strong> units</li>
+                </ul>
+                <p>Are you sure you want to proceed with this update?</p>
+            </div>
 
-    <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline-block; margin-right: 10px;">
-        <input type="hidden" name="action" value="update">
-        <input type="hidden" name="fruitID" value="<%= fruitID %>">
-        <input type="hidden" name="quantity" value="<%= newQuantity %>">
-        <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Confirm Update</button>
-    </form>
-    <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; font-size: 16px;">Cancel</a>
+            <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline-block; margin-right: 10px;">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="fruitID" value="<%= fruitID %>">
+                <input type="hidden" name="quantity" value="<%= newQuantity %>">
+                <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Confirm Update</button>
+            </form>
+            <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; font-size: 16px;">Cancel</a>
+        <% } else { %>
+            <!-- Edit step with prefilled form -->
+            <div style="background-color: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; color: #333; font-size: 1.3em;">Update Stock: <%= fruitName %></h3>
+                <p>Current quantity: <strong><%= currentStock.getQuantity() %></strong></p>
+                
+                <form action="<%=request.getContextPath()%>/stock" method="get">
+                    <input type="hidden" name="action" value="showUpdateForm">
+                    <input type="hidden" name="fruitID" value="<%= fruitID %>">
+                    <input type="hidden" name="step" value="confirm">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label for="quantity" style="display: block; margin-bottom: 5px; font-weight: bold;">New Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" min="0" value="<%= currentStock.getQuantity() %>" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Continue</button>
+                        <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; margin-left: 10px; font-size: 16px;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        <% } %>
     <% } else { %>
     <div style="background-color: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h3 style="margin-top: 0; color: #333;">Select Fruit to Update</h3>
-        <form action="<%=request.getContextPath()%>/stock" method="post">
-            <input type="hidden" name="action" value="update">
+        <form action="<%=request.getContextPath()%>/stock" method="get">
+            <input type="hidden" name="action" value="showUpdateForm">
 
             <div style="margin-bottom: 15px;">
                 <label for="fruitID" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit:</label>
@@ -100,13 +128,8 @@
                 </select>
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="quantity" style="display: block; margin-bottom: 5px; font-weight: bold;">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" min="0" value="0" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            </div>
-
             <div style="margin-top: 20px;">
-                <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Update Stock</button>
+                <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Continue</button>
                 <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; margin-left: 10px; font-size: 16px;">Cancel</a>
             </div>
         </form>
