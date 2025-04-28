@@ -9,6 +9,10 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="ict.bean.StockBean"%>
 
+<%
+    ArrayList<StockBean> stocks = (ArrayList<StockBean>) request.getAttribute("stocks");
+%>
+
 <h1>Shop Stock Management</h1>
 
 <%-- Display any messages --%>
@@ -18,8 +22,38 @@
     </div>
 <% } %>
 
-<div style="margin-bottom: 20px;">
+<div style="margin-bottom: 20px; display: flex; gap: 10px;">
     <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="btn">Update Stock</a>
+</div>
+
+<!-- Quick Stock Adjustment Form -->
+<div class="quick-adjust-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Quick Stock Adjustment</h3>
+    <form action="<%=request.getContextPath()%>/stock" method="post" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div style="flex: 1; min-width: 200px;">
+            <label for="quickFruitID" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit:</label>
+            <select id="quickFruitID" name="fruitID" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">Select Fruit</option>
+                <% 
+                    if (stocks != null && !stocks.isEmpty()) {
+                        for (StockBean stock : stocks) {
+                %>
+                <option value="<%= stock.getFruitID() %>"><%= stock.getFruitName() %> (Current: <%= stock.getQuantity() %>)</option>
+                <% 
+                        }
+                    }
+                %>
+            </select>
+        </div>
+        <div style="flex: 1; min-width: 120px;">
+            <label for="quickQuantity" style="display: block; margin-bottom: 5px; font-weight: bold;">Quantity:</label>
+            <input type="number" id="quickQuantity" name="quantity" min="1" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="flex: 1; min-width: 120px; display: flex; gap: 10px;">
+            <button type="submit" name="action" value="checkIn" class="btn" style="flex: 1; background-color: #28a745; color: white;">Check In</button>
+            <button type="submit" name="action" value="checkOut" class="btn" style="flex: 1; background-color: #dc3545; color: white;">Check Out</button>
+        </div>
+    </form>
 </div>
 
 <!-- Filter Form -->
@@ -63,7 +97,6 @@
     </thead>
     <tbody>
         <% 
-            ArrayList<StockBean> stocks = (ArrayList<StockBean>) request.getAttribute("stocks");
             if (stocks != null && !stocks.isEmpty()) {
                 for (StockBean stock : stocks) {
         %>
@@ -71,8 +104,24 @@
             <td><%= stock.getFruitName() %></td>
             <td><%= stock.getQuantity() %></td>
             <td><%= stock.getLastUpdated() %></td>
-            <td>
+            <td style="display: flex; gap: 5px;">
                 <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn">Update</a>
+                
+                <!-- Check-in button with form -->
+                <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">
+                    <input type="hidden" name="action" value="checkIn">
+                    <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn" style="background-color: #28a745; color: white;">+</button>
+                </form>
+                
+                <!-- Check-out button with form -->
+                <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">
+                    <input type="hidden" name="action" value="checkOut">
+                    <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="btn" style="background-color: #dc3545; color: white;" <%= stock.getQuantity() < 1 ? "disabled" : "" %>>-</button>
+                </form>
             </td>
         </tr>
         <% 

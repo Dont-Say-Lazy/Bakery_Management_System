@@ -151,15 +151,41 @@ public class StockController extends HttpServlet {
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         int locationID = user.getLocationID();
         
+        // Check if user confirmed the action
+        String confirmed = request.getParameter("confirmed");
+        
+        // Get fruit name for the message
+        FruitBean fruit = fruitDB.getFruitByID(fruitID);
+        String fruitName = (fruit != null) ? fruit.getName() : "Unknown fruit";
+        
         // Check if the stock entry already exists
         StockBean stock = stockDB.getStockByLocationAndFruit(locationID, fruitID);
+        
+        if (confirmed == null || !confirmed.equals("true")) {
+            // If not confirmed, store data in request and forward to confirmation page
+            request.setAttribute("fruitID", fruitID);
+            request.setAttribute("quantity", quantity);
+            request.setAttribute("fruitName", fruitName);
+            request.setAttribute("currentQuantity", stock != null ? stock.getQuantity() : 0);
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockUpdate.jsp");
+            dispatcher.forward(request, response);
+            return;
+        }
         
         boolean success;
         
         if (stock != null) {
             // Update existing stock
+            int oldQuantity = stock.getQuantity();
             stock.setQuantity(quantity);
             success = stockDB.updateStock(stock);
+            
+            if (success) {
+                request.setAttribute("message", quantity + " stocks/ " + fruitName + " has been updated from " + oldQuantity + ".");
+            } else {
+                request.setAttribute("message", "Failed to update stock.");
+            }
         } else {
             // Create new stock entry
             stock = new StockBean();
@@ -167,12 +193,12 @@ public class StockController extends HttpServlet {
             stock.setFruitID(fruitID);
             stock.setQuantity(quantity);
             success = stockDB.addStock(stock);
-        }
-        
-        if (success) {
-            request.setAttribute("message", "Stock updated successfully.");
-        } else {
-            request.setAttribute("message", "Failed to update stock.");
+            
+            if (success) {
+                request.setAttribute("message", quantity + " stocks/ " + fruitName + " has been added to inventory.");
+            } else {
+                request.setAttribute("message", "Failed to add stock.");
+            }
         }
         
         viewStock(request, response, user);
@@ -184,16 +210,48 @@ public class StockController extends HttpServlet {
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         int locationID = user.getLocationID();
         
+        // Check if user confirmed the action
+        String confirmed = request.getParameter("confirmed");
+        
+        // Get fruit name for the message
+        FruitBean fruit = fruitDB.getFruitByID(fruitID);
+        String fruitName = (fruit != null) ? fruit.getName() : "Unknown fruit";
+        
         // Get the current stock
         StockBean stock = stockDB.getStockByLocationAndFruit(locationID, fruitID);
+        
+        // Get location details
+        LocationBean location = locationDB.getLocationByID(locationID);
+        String locationName = (location != null) ? location.getName() : "Unknown location";
+        
+        if (confirmed == null || !confirmed.equals("true")) {
+            // If not confirmed, store data in request and forward to confirmation page
+            request.setAttribute("fruitID", fruitID);
+            request.setAttribute("quantity", quantity);
+            request.setAttribute("fruitName", fruitName);
+            request.setAttribute("locationName", locationName);
+            request.setAttribute("currentQuantity", stock != null ? stock.getQuantity() : 0);
+            request.setAttribute("actionType", "checkIn");
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
+            dispatcher.forward(request, response);
+            return;
+        }
         
         boolean success;
         
         if (stock != null) {
             // Update existing stock by adding the quantity
-            int newQuantity = stock.getQuantity() + quantity;
+            int oldQuantity = stock.getQuantity();
+            int newQuantity = oldQuantity + quantity;
             stock.setQuantity(newQuantity);
             success = stockDB.updateStock(stock);
+            
+            if (success) {
+                request.setAttribute("message", quantity + " stocks/ " + fruitName + " has been checked in. Total inventory updated from " + oldQuantity + " to " + newQuantity + ".");
+            } else {
+                request.setAttribute("message", "Failed to check in stock.");
+            }
         } else {
             // Create new stock entry
             stock = new StockBean();
@@ -201,12 +259,12 @@ public class StockController extends HttpServlet {
             stock.setFruitID(fruitID);
             stock.setQuantity(quantity);
             success = stockDB.addStock(stock);
-        }
-        
-        if (success) {
-            request.setAttribute("message", "Stock checked in successfully.");
-        } else {
-            request.setAttribute("message", "Failed to check in stock.");
+            
+            if (success) {
+                request.setAttribute("message", quantity + " stocks/ " + fruitName + " has been checked in to " + locationName + ".");
+            } else {
+                request.setAttribute("message", "Failed to check in stock.");
+            }
         }
         
         viewStock(request, response, user);
@@ -218,22 +276,48 @@ public class StockController extends HttpServlet {
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         int locationID = user.getLocationID();
         
+        // Check if user confirmed the action
+        String confirmed = request.getParameter("confirmed");
+        
+        // Get fruit name for the message
+        FruitBean fruit = fruitDB.getFruitByID(fruitID);
+        String fruitName = (fruit != null) ? fruit.getName() : "Unknown fruit";
+        
         // Get the current stock
         StockBean stock = stockDB.getStockByLocationAndFruit(locationID, fruitID);
         
+        // Get location details
+        LocationBean location = locationDB.getLocationByID(locationID);
+        String locationName = (location != null) ? location.getName() : "Unknown location";
+        
         if (stock == null || stock.getQuantity() < quantity) {
-            request.setAttribute("message", "Insufficient stock for checkout.");
+            request.setAttribute("message", "Insufficient stock of " + fruitName + " for checkout. Available: " + (stock != null ? stock.getQuantity() : 0) + ".");
             viewStock(request, response, user);
             return;
         }
         
+        if (confirmed == null || !confirmed.equals("true")) {
+            // If not confirmed, store data in request and forward to confirmation page
+            request.setAttribute("fruitID", fruitID);
+            request.setAttribute("quantity", quantity);
+            request.setAttribute("fruitName", fruitName);
+            request.setAttribute("locationName", locationName);
+            request.setAttribute("currentQuantity", stock.getQuantity());
+            request.setAttribute("actionType", "checkOut");
+            
+            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
+            dispatcher.forward(request, response);
+            return;
+        }
+        
         // Update existing stock by subtracting the quantity
-        int newQuantity = stock.getQuantity() - quantity;
+        int oldQuantity = stock.getQuantity();
+        int newQuantity = oldQuantity - quantity;
         stock.setQuantity(newQuantity);
         boolean success = stockDB.updateStock(stock);
         
         if (success) {
-            request.setAttribute("message", "Stock checked out successfully.");
+            request.setAttribute("message", quantity + " stocks/ " + fruitName + " has been checked out. Inventory updated from " + oldQuantity + " to " + newQuantity + ".");
         } else {
             request.setAttribute("message", "Failed to check out stock.");
         }
