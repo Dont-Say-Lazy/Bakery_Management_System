@@ -47,7 +47,7 @@
 
 <div class="dashboard-section">
     <h2><i class="fas fa-cubes"></i> Current Stock Levels</h2>
-    <div class="stock-container">
+    <div class="stock-container" style="background-color: #f8f9fa; border: 1px solid #ddd;">
         <stock:displayStock locationID="<%= user.getLocationID()%>"/>
     </div>
 </div>
