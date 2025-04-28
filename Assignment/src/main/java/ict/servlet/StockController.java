@@ -73,6 +73,9 @@ public class StockController extends HttpServlet {
             case "view":
                 viewStock(request, response, user);
                 break;
+            case "filter":
+                filterStock(request, response, user);
+                break;
             case "update":
                 updateStock(request, response, user);
                 break;
@@ -236,5 +239,86 @@ public class StockController extends HttpServlet {
         }
         
         viewStock(request, response, user);
+    }
+    
+    private void filterStock(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        String fruitName = request.getParameter("fruitName");
+        String quantityMin = request.getParameter("quantityMin");
+        String quantityMax = request.getParameter("quantityMax");
+        
+        ArrayList<StockBean> stocks;
+        
+        // Get initial stock list based on user role
+        if (user.getRole().equals("shop_staff") || user.getRole().equals("warehouse_staff")) {
+            // Staff can only see their location's stock
+            stocks = stockDB.queryStockByLocation(user.getLocationID());
+        } else {
+            // Senior management can see all stock
+            stocks = stockDB.queryStock();
+        }
+        
+        // Apply filters
+        ArrayList<StockBean> filteredStocks = new ArrayList<>();
+        
+        for (StockBean stock : stocks) {
+            boolean includeStock = true;
+            
+            // Filter by fruit name
+            if (fruitName != null && !fruitName.isEmpty()) {
+                if (!stock.getFruitName().toLowerCase().contains(fruitName.toLowerCase())) {
+                    includeStock = false;
+                }
+            }
+            
+            // Filter by minimum quantity
+            if (quantityMin != null && !quantityMin.isEmpty()) {
+                try {
+                    int minQty = Integer.parseInt(quantityMin);
+                    if (stock.getQuantity() < minQty) {
+                        includeStock = false;
+                    }
+                } catch (NumberFormatException e) {
+                    // Invalid input, ignore this filter
+                }
+            }
+            
+            // Filter by maximum quantity
+            if (quantityMax != null && !quantityMax.isEmpty()) {
+                try {
+                    int maxQty = Integer.parseInt(quantityMax);
+                    if (stock.getQuantity() > maxQty) {
+                        includeStock = false;
+                    }
+                } catch (NumberFormatException e) {
+                    // Invalid input, ignore this filter
+                }
+            }
+            
+            if (includeStock) {
+                filteredStocks.add(stock);
+            }
+        }
+        
+        request.setAttribute("stocks", filteredStocks);
+        
+        // Keep filter values for the form
+        request.setAttribute("filterFruitName", fruitName);
+        request.setAttribute("filterQuantityMin", quantityMin);
+        request.setAttribute("filterQuantityMax", quantityMax);
+        
+        String userRole = user.getRole();
+        String destination;
+        
+        if (userRole.equals("shop_staff")) {
+            destination = "/shop/updateStock.jsp";
+        } else if (userRole.equals("warehouse_staff")) {
+            destination = "/warehouse/updateStock.jsp";
+        } else {
+            destination = "/management/viewStock.jsp";
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher(destination);
+        dispatcher.forward(request, response);
     }
 }

@@ -23,6 +23,55 @@
     <a href="<%=request.getContextPath()%>/user?action=showAddForm" class="btn">Add New User</a>
 </div>
 
+<!-- Filter Form -->
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+    <h3>Filter Users</h3>
+    <form action="<%=request.getContextPath()%>/user" method="get">
+        <input type="hidden" name="action" value="filter">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="${filterUsername}" placeholder="Filter by username">
+            </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name">
+            </div>
+            <div>
+                <label for="role">Role:</label>
+                <select id="role" name="role">
+                    <option value="">All Roles</option>
+                    <option value="senior_management" ${filterRole == 'senior_management' ? 'selected' : ''}>Senior Management</option>
+                    <option value="shop_manager" ${filterRole == 'shop_manager' ? 'selected' : ''}>Shop Manager</option>
+                    <option value="warehouse_staff" ${filterRole == 'warehouse_staff' ? 'selected' : ''}>Warehouse Staff</option>
+                </select>
+            </div>
+            <div>
+                <label for="locationID">Location:</label>
+                <select id="locationID" name="locationID">
+                    <option value="0">All Locations</option>
+                    <%
+                        ArrayList<LocationBean> filterLocations = (ArrayList<LocationBean>) request.getAttribute("locations");
+                        String filterLocationID = (String) request.getAttribute("filterLocationID");
+                        if (filterLocations != null) {
+                            for (LocationBean loc : filterLocations) {
+                                boolean isSelected = filterLocationID != null && filterLocationID.equals(String.valueOf(loc.getLocationID()));
+                    %>
+                    <option value="<%= loc.getLocationID()%>" <%= isSelected ? "selected" : ""%>><%= loc.getName()%></option>
+                    <%
+                            }
+                        }
+                    %>
+                </select>
+            </div>
+            <div style="align-self: flex-end;">
+                <button type="submit" class="btn">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/user?action=list" class="btn">Clear Filter</a>
+            </div>
+        </div>
+    </form>
+</div>
+
 <table>
     <thead>
         <tr>

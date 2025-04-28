@@ -80,6 +80,9 @@ public class BorrowingController extends HttpServlet {
             case "list":
                 listBorrowings(request, response, user);
                 break;
+            case "filter":
+                filterBorrowings(request, response, user);
+                break;
             case "showAddForm":
                 showAddForm(request, response, user);
                 break;
@@ -371,5 +374,101 @@ public class BorrowingController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonBuilder.toString());
+    }
+    
+    private void filterBorrowings(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        String fruitName = request.getParameter("fruitName");
+        String status = request.getParameter("status");
+        String shopName = request.getParameter("shopName");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        
+        ArrayList<BorrowingBean> borrowings;
+        
+        // Get initial borrowings list based on user role
+        if (user.getRole().equals("shop_staff")) {
+            // Get borrowings for this shop (both as source and destination)
+            ArrayList<BorrowingBean> sourceBorrowings = borrowingDB.getBorrowingsBySourceShop(user.getLocationID());
+            ArrayList<BorrowingBean> destBorrowings = borrowingDB.getBorrowingsByDestinationShop(user.getLocationID());
+            
+            // Combine the two lists
+            borrowings = new ArrayList<>();
+            borrowings.addAll(sourceBorrowings);
+            borrowings.addAll(destBorrowings);
+        } else {
+            // Admin and warehouse staff can see all borrowings
+            borrowings = borrowingDB.queryBorrowings();
+        }
+        
+        // Apply filters
+        ArrayList<BorrowingBean> filteredBorrowings = new ArrayList<>();
+        
+        for (BorrowingBean borrowing : borrowings) {
+            boolean includeItem = true;
+            
+            // Filter by fruit name
+            if (fruitName != null && !fruitName.isEmpty()) {
+                if (!borrowing.getFruitName().toLowerCase().contains(fruitName.toLowerCase())) {
+                    includeItem = false;
+                }
+            }
+            
+            // Filter by status
+            if (status != null && !status.isEmpty()) {
+                if (!borrowing.getStatus().equals(status)) {
+                    includeItem = false;
+                }
+            }
+            
+            // Filter by shop name (either source or destination)
+            if (shopName != null && !shopName.isEmpty()) {
+                boolean matchesSource = borrowing.getSourceShopName().toLowerCase().contains(shopName.toLowerCase());
+                boolean matchesDestination = borrowing.getDestinationShopName().toLowerCase().contains(shopName.toLowerCase());
+                
+                if (!matchesSource && !matchesDestination) {
+                    includeItem = false;
+                }
+            }
+            
+            // Filter by date range
+            if (startDate != null && !startDate.isEmpty()) {
+                try {
+                    Date startDateObj = Date.valueOf(startDate);
+                    if (borrowing.getRequestDate().before(startDateObj)) {
+                        includeItem = false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Invalid date format, ignore this filter
+                }
+            }
+            
+            if (endDate != null && !endDate.isEmpty()) {
+                try {
+                    Date endDateObj = Date.valueOf(endDate);
+                    if (borrowing.getRequestDate().after(endDateObj)) {
+                        includeItem = false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Invalid date format, ignore this filter
+                }
+            }
+            
+            if (includeItem) {
+                filteredBorrowings.add(borrowing);
+            }
+        }
+        
+        request.setAttribute("borrowings", filteredBorrowings);
+        
+        // Keep filter values for the form
+        request.setAttribute("filterFruitName", fruitName);
+        request.setAttribute("filterStatus", status);
+        request.setAttribute("filterShopName", shopName);
+        request.setAttribute("filterStartDate", startDate);
+        request.setAttribute("filterEndDate", endDate);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/borrowFruit.jsp");
+        dispatcher.forward(request, response);
     }
 }

@@ -75,6 +75,9 @@ public class UserController extends HttpServlet {
             case "list":
                 listUsers(request, response);
                 break;
+            case "filter":
+                filterUsers(request, response);
+                break;
             case "showAddForm":
                 showAddForm(request, response);
                 break;
@@ -218,5 +221,72 @@ public class UserController extends HttpServlet {
         }
 
         listUsers(request, response);
+    }
+
+    private void filterUsers(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String name = request.getParameter("name");
+        String role = request.getParameter("role");
+        String locationIDStr = request.getParameter("locationID");
+        
+        ArrayList<UserBean> filteredUsers = userDB.queryUser();
+        
+        // Apply filters if parameters are provided
+        if (username != null && !username.isEmpty()) {
+            ArrayList<UserBean> tempList = new ArrayList<>();
+            for (UserBean user : filteredUsers) {
+                if (user.getUsername().toLowerCase().contains(username.toLowerCase())) {
+                    tempList.add(user);
+                }
+            }
+            filteredUsers = tempList;
+        }
+        
+        if (name != null && !name.isEmpty()) {
+            ArrayList<UserBean> tempList = new ArrayList<>();
+            for (UserBean user : filteredUsers) {
+                if (user.getName().toLowerCase().contains(name.toLowerCase())) {
+                    tempList.add(user);
+                }
+            }
+            filteredUsers = tempList;
+        }
+        
+        if (role != null && !role.isEmpty()) {
+            ArrayList<UserBean> tempList = new ArrayList<>();
+            for (UserBean user : filteredUsers) {
+                if (user.getRole().equals(role)) {
+                    tempList.add(user);
+                }
+            }
+            filteredUsers = tempList;
+        }
+        
+        if (locationIDStr != null && !locationIDStr.isEmpty() && !locationIDStr.equals("0")) {
+            int locationID = Integer.parseInt(locationIDStr);
+            ArrayList<UserBean> tempList = new ArrayList<>();
+            for (UserBean user : filteredUsers) {
+                if (user.getLocationID() == locationID) {
+                    tempList.add(user);
+                }
+            }
+            filteredUsers = tempList;
+        }
+        
+        request.setAttribute("users", filteredUsers);
+        
+        // Get locations for display
+        ArrayList<LocationBean> locations = locationDB.queryLocation();
+        request.setAttribute("locations", locations);
+        
+        // Keep the filter values for the form
+        request.setAttribute("filterUsername", username);
+        request.setAttribute("filterName", name);
+        request.setAttribute("filterRole", role);
+        request.setAttribute("filterLocationID", locationIDStr);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/management/userManagement.jsp");
+        dispatcher.forward(request, response);
     }
 }

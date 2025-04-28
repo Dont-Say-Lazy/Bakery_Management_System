@@ -22,6 +22,28 @@
     <a href="<%=request.getContextPath()%>/fruit?action=showAddForm" class="btn">Add New Fruit</a>
 </div>
 
+<!-- Filter Form -->
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+    <h3>Filter Fruits</h3>
+    <form action="<%=request.getContextPath()%>/fruit" method="get">
+        <input type="hidden" name="action" value="filter">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" value="${filterName}" placeholder="Filter by name">
+            </div>
+            <div>
+                <label for="sourceCountry">Source Country:</label>
+                <input type="text" id="sourceCountry" name="sourceCountry" value="${filterSourceCountry}" placeholder="Filter by country">
+            </div>
+            <div style="align-self: flex-end;">
+                <button type="submit" class="btn">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn">Clear Filter</a>
+            </div>
+        </div>
+    </form>
+</div>
+
 <table>
     <thead>
         <tr>

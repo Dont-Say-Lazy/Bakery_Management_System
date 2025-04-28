@@ -22,6 +22,32 @@
     <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="btn">Update Stock</a>
 </div>
 
+<!-- Filter Form -->
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+    <h3>Filter Stock</h3>
+    <form action="<%=request.getContextPath()%>/stock" method="get">
+        <input type="hidden" name="action" value="filter">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <label for="fruitName">Fruit Name:</label>
+                <input type="text" id="fruitName" name="fruitName" value="${filterFruitName}" placeholder="Filter by fruit name">
+            </div>
+            <div>
+                <label for="quantityMin">Min Quantity:</label>
+                <input type="number" id="quantityMin" name="quantityMin" value="${filterQuantityMin}" placeholder="Minimum" min="0">
+            </div>
+            <div>
+                <label for="quantityMax">Max Quantity:</label>
+                <input type="number" id="quantityMax" name="quantityMax" value="${filterQuantityMax}" placeholder="Maximum" min="0">
+            </div>
+            <div style="align-self: flex-end;">
+                <button type="submit" class="btn">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn">Clear Filter</a>
+            </div>
+        </div>
+    </form>
+</div>
+
 <h2>Current Stock</h2>
 
 <table>

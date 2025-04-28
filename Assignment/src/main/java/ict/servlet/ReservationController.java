@@ -76,6 +76,9 @@ public class ReservationController extends HttpServlet {
             case "list":
                 listReservations(request, response, user);
                 break;
+            case "filter":
+                filterReservations(request, response, user);
+                break;
             case "showAddForm":
                 showAddForm(request, response);
                 break;
@@ -320,5 +323,121 @@ public class ReservationController extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonBuilder.toString());
+    }
+    
+    private void filterReservations(HttpServletRequest request, HttpServletResponse response, UserBean user)
+            throws ServletException, IOException {
+        String fruitName = request.getParameter("fruitName");
+        String status = request.getParameter("status");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        String minQuantity = request.getParameter("minQuantity");
+        String maxQuantity = request.getParameter("maxQuantity");
+        
+        ArrayList<ReservationBean> reservations;
+        
+        // Get initial list based on user role
+        if (user.getRole().equals("shop_staff")) {
+            // Shop staff can only see their shop's reservations
+            reservations = reservationDB.getReservationsByShop(user.getLocationID());
+        } else {
+            // Warehouse staff and senior management can see all reservations
+            reservations = reservationDB.queryReservations();
+        }
+        
+        // Apply filters
+        ArrayList<ReservationBean> filteredReservations = new ArrayList<>();
+        
+        for (ReservationBean reservation : reservations) {
+            boolean includeItem = true;
+            
+            // Filter by fruit name
+            if (fruitName != null && !fruitName.isEmpty()) {
+                if (!reservation.getFruitName().toLowerCase().contains(fruitName.toLowerCase())) {
+                    includeItem = false;
+                }
+            }
+            
+            // Filter by status
+            if (status != null && !status.isEmpty()) {
+                if (!reservation.getStatus().equals(status)) {
+                    includeItem = false;
+                }
+            }
+            
+            // Filter by request date range
+            if (startDate != null && !startDate.isEmpty()) {
+                try {
+                    Date startDateObj = Date.valueOf(startDate);
+                    if (reservation.getRequestDate().before(startDateObj)) {
+                        includeItem = false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Invalid date format, ignore this filter
+                }
+            }
+            
+            if (endDate != null && !endDate.isEmpty()) {
+                try {
+                    Date endDateObj = Date.valueOf(endDate);
+                    if (reservation.getRequestDate().after(endDateObj)) {
+                        includeItem = false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Invalid date format, ignore this filter
+                }
+            }
+            
+            // Filter by quantity range
+            if (minQuantity != null && !minQuantity.isEmpty()) {
+                try {
+                    int minQty = Integer.parseInt(minQuantity);
+                    if (reservation.getQuantity() < minQty) {
+                        includeItem = false;
+                    }
+                } catch (NumberFormatException e) {
+                    // Invalid number format, ignore this filter
+                }
+            }
+            
+            if (maxQuantity != null && !maxQuantity.isEmpty()) {
+                try {
+                    int maxQty = Integer.parseInt(maxQuantity);
+                    if (reservation.getQuantity() > maxQty) {
+                        includeItem = false;
+                    }
+                } catch (NumberFormatException e) {
+                    // Invalid number format, ignore this filter
+                }
+            }
+            
+            if (includeItem) {
+                filteredReservations.add(reservation);
+            }
+        }
+        
+        request.setAttribute("reservations", filteredReservations);
+        
+        // Keep filter values for the form
+        request.setAttribute("filterFruitName", fruitName);
+        request.setAttribute("filterStatus", status);
+        request.setAttribute("filterStartDate", startDate);
+        request.setAttribute("filterEndDate", endDate);
+        request.setAttribute("filterMinQuantity", minQuantity);
+        request.setAttribute("filterMaxQuantity", maxQuantity);
+        
+        String userRole = user.getRole();
+        String destination;
+        
+        if (userRole.equals("shop_staff")) {
+            destination = "/shop/checkReserves.jsp";
+        } else if (userRole.equals("warehouse_staff")) {
+            destination = "/warehouse/approveRequests.jsp";
+        } else {
+            destination = "/management/viewReservations.jsp";
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher(destination);
+        dispatcher.forward(request, response);
     }
 }

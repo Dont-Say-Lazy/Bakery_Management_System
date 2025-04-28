@@ -22,6 +22,32 @@
     <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm" class="btn">Update Stock</a>
 </div>
 
+<!-- Filter Form -->
+<div class="filter-section" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; color: #333;">Filter Stock</h3>
+    <form action="<%=request.getContextPath()%>/stock" method="get">
+        <input type="hidden" name="action" value="filter">
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="fruitName" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit Name:</label>
+                <input type="text" id="fruitName" name="fruitName" value="${filterFruitName}" placeholder="Filter by fruit name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label for="quantityMin" style="display: block; margin-bottom: 5px; font-weight: bold;">Min Quantity:</label>
+                <input type="number" id="quantityMin" name="quantityMin" value="${filterQuantityMin}" placeholder="Minimum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label for="quantityMax" style="display: block; margin-bottom: 5px; font-weight: bold;">Max Quantity:</label>
+                <input type="number" id="quantityMax" name="quantityMax" value="${filterQuantityMax}" placeholder="Maximum" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="flex-basis: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="btn" style="background-color: #4CAF50; color: white; margin-right: 10px;">Apply Filter</button>
+                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #f44336; color: white;">Clear Filter</a>
+            </div>
+        </div>
+    </form>
+</div>
+
 <h2>Current Stock</h2>
 
 <table>
