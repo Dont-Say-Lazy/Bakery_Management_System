@@ -1,7 +1,7 @@
 <%-- 
-    Document   : updateStock
-    Created on : Apr 23, 2025, 11:12:43 PM
-    Author     : Rain
+    Document   : viewStock
+    Created on : Apr 29, 2025, 12:25:44 AM
+    Author     : AlexS
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -13,7 +13,7 @@
     ArrayList<StockBean> stocks = (ArrayList<StockBean>) request.getAttribute("stocks");
 %>
 
-<h1>Warehouse Stock Management</h1>
+<h1>Central Stock Management</h1>
 
 <%-- Display any messages --%>
 <% if (request.getAttribute("message") != null) { %>
@@ -38,7 +38,7 @@
                     if (stocks != null && !stocks.isEmpty()) {
                         for (StockBean stock : stocks) {
                 %>
-                <option value="<%= stock.getFruitID() %>"><%= stock.getFruitName() %> (Current: <%= stock.getQuantity() %>)</option>
+                <option value="<%= stock.getFruitID() %>"><%= stock.getFruitName() %> at <%= stock.getLocationName() %> (Current: <%= stock.getQuantity() %>)</option>
                 <% 
                         }
                     }
@@ -66,6 +66,10 @@
                 <label for="fruitName" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit Name:</label>
                 <input type="text" id="fruitName" name="fruitName" value="${filterFruitName}" placeholder="Filter by fruit name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
+            <div style="flex: 1; min-width: 200px;">
+                <label for="locationName" style="display: block; margin-bottom: 5px; font-weight: bold;">Location:</label>
+                <input type="text" id="locationName" name="locationName" value="${filterLocationName}" placeholder="Filter by location" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
             <div style="flex: 2; min-width: 200px; display: flex; gap: 15px;">
                 <div style="flex: 1;">
                     <label for="quantityMin" style="display: block; margin-bottom: 5px; font-weight: bold;">Min Quantity:</label>
@@ -84,11 +88,12 @@
     </form>
 </div>
 
-<h2>Current Stock</h2>
+<h2>Stock Across All Locations</h2>
 
 <table>
     <thead>
         <tr>
+            <th>Location</th>
             <th>Fruit</th>
             <th>Quantity</th>
             <th>Last Updated</th>
@@ -101,16 +106,18 @@
                 for (StockBean stock : stocks) {
         %>
         <tr>
+            <td><%= stock.getLocationName() %></td>
             <td><%= stock.getFruitName() %></td>
             <td><%= stock.getQuantity() %></td>
             <td><%= stock.getLastUpdated() %></td>
             <td style="display: flex; gap: 5px;">
-                <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>" class="btn">Update</a>
+                <a href="<%=request.getContextPath()%>/stock?action=showUpdateForm&fruitID=<%= stock.getFruitID() %>&locationID=<%= stock.getLocationID() %>" class="btn">Update</a>
                 
                 <!-- Check-in button with form -->
                 <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">
                     <input type="hidden" name="action" value="checkIn">
                     <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
+                    <input type="hidden" name="locationID" value="<%= stock.getLocationID() %>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit" class="btn" style="background-color: #28a745; color: white;">+</button>
                 </form>
@@ -119,6 +126,7 @@
                 <form action="<%=request.getContextPath()%>/stock" method="post" style="display: inline;">
                     <input type="hidden" name="action" value="checkOut">
                     <input type="hidden" name="fruitID" value="<%= stock.getFruitID() %>">
+                    <input type="hidden" name="locationID" value="<%= stock.getLocationID() %>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit" class="btn" style="background-color: #dc3545; color: white;" <%= stock.getQuantity() < 1 ? "disabled" : "" %>>-</button>
                 </form>
@@ -129,10 +137,10 @@
             } else {
         %>
         <tr>
-            <td colspan="4">No stock data available</td>
+            <td colspan="5">No stock data available</td>
         </tr>
         <% } %>
     </tbody>
 </table>
 
-<%@include file="../footer.jsp"%>
+<%@include file="../footer.jsp"%> 

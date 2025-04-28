@@ -130,6 +130,11 @@ public class StockController extends HttpServlet {
         ArrayList<FruitBean> fruits = fruitDB.queryFruit();
         request.setAttribute("fruits", fruits);
         
+        // For management role, also handle location selection
+        if (user.getRole().equals("senior_management") && request.getParameter("locationID") != null) {
+            request.setAttribute("selectedLocationID", request.getParameter("locationID"));
+        }
+        
         String userRole = user.getRole();
         String destination;
         
@@ -149,7 +154,14 @@ public class StockController extends HttpServlet {
             throws ServletException, IOException {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int locationID = user.getLocationID();
+        int locationID;
+        
+        // For management, they might specify a location
+        if (user.getRole().equals("senior_management") && request.getParameter("locationID") != null) {
+            locationID = Integer.parseInt(request.getParameter("locationID"));
+        } else {
+            locationID = user.getLocationID();
+        }
         
         // Check if user confirmed the action
         String confirmed = request.getParameter("confirmed");
@@ -157,6 +169,10 @@ public class StockController extends HttpServlet {
         // Get fruit name for the message
         FruitBean fruit = fruitDB.getFruitByID(fruitID);
         String fruitName = (fruit != null) ? fruit.getName() : "Unknown fruit";
+        
+        // Get location name
+        LocationBean location = locationDB.getLocationByID(locationID);
+        String locationName = (location != null) ? location.getName() : "Unknown location";
         
         // Check if the stock entry already exists
         StockBean stock = stockDB.getStockByLocationAndFruit(locationID, fruitID);
@@ -168,8 +184,18 @@ public class StockController extends HttpServlet {
             request.setAttribute("fruitName", fruitName);
             request.setAttribute("currentQuantity", stock != null ? stock.getQuantity() : 0);
             
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockUpdate.jsp");
-            dispatcher.forward(request, response);
+            if (user.getRole().equals("senior_management")) {
+                request.setAttribute("locationID", locationID);
+                request.setAttribute("locationName", locationName);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmStockUpdate.jsp");
+                dispatcher.forward(request, response);
+            } else if (user.getRole().equals("warehouse_staff")) {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmStockUpdate.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockUpdate.jsp");
+                dispatcher.forward(request, response);
+            }
             return;
         }
         
@@ -208,7 +234,14 @@ public class StockController extends HttpServlet {
             throws ServletException, IOException {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int locationID = user.getLocationID();
+        int locationID;
+        
+        // For management, they might specify a location
+        if (user.getRole().equals("senior_management") && request.getParameter("locationID") != null) {
+            locationID = Integer.parseInt(request.getParameter("locationID"));
+        } else {
+            locationID = user.getLocationID();
+        }
         
         // Check if user confirmed the action
         String confirmed = request.getParameter("confirmed");
@@ -233,8 +266,17 @@ public class StockController extends HttpServlet {
             request.setAttribute("currentQuantity", stock != null ? stock.getQuantity() : 0);
             request.setAttribute("actionType", "checkIn");
             
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
-            dispatcher.forward(request, response);
+            if (user.getRole().equals("senior_management")) {
+                request.setAttribute("locationID", locationID);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            } else if (user.getRole().equals("warehouse_staff")) {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            }
             return;
         }
         
@@ -274,7 +316,14 @@ public class StockController extends HttpServlet {
             throws ServletException, IOException {
         int fruitID = Integer.parseInt(request.getParameter("fruitID"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int locationID = user.getLocationID();
+        int locationID;
+        
+        // For management, they might specify a location
+        if (user.getRole().equals("senior_management") && request.getParameter("locationID") != null) {
+            locationID = Integer.parseInt(request.getParameter("locationID"));
+        } else {
+            locationID = user.getLocationID();
+        }
         
         // Check if user confirmed the action
         String confirmed = request.getParameter("confirmed");
@@ -305,8 +354,17 @@ public class StockController extends HttpServlet {
             request.setAttribute("currentQuantity", stock.getQuantity());
             request.setAttribute("actionType", "checkOut");
             
-            RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
-            dispatcher.forward(request, response);
+            if (user.getRole().equals("senior_management")) {
+                request.setAttribute("locationID", locationID);
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            } else if (user.getRole().equals("warehouse_staff")) {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/warehouse/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            } else {
+                RequestDispatcher dispatcher = request.getRequestDispatcher("/shop/confirmStockAction.jsp");
+                dispatcher.forward(request, response);
+            }
             return;
         }
         
@@ -330,6 +388,7 @@ public class StockController extends HttpServlet {
         String fruitName = request.getParameter("fruitName");
         String quantityMin = request.getParameter("quantityMin");
         String quantityMax = request.getParameter("quantityMax");
+        String locationName = request.getParameter("locationName");
         
         ArrayList<StockBean> stocks;
         
@@ -351,6 +410,13 @@ public class StockController extends HttpServlet {
             // Filter by fruit name
             if (fruitName != null && !fruitName.isEmpty()) {
                 if (!stock.getFruitName().toLowerCase().contains(fruitName.toLowerCase())) {
+                    includeStock = false;
+                }
+            }
+            
+            // Filter by location name (for management only)
+            if (user.getRole().equals("senior_management") && locationName != null && !locationName.isEmpty()) {
+                if (!stock.getLocationName().toLowerCase().contains(locationName.toLowerCase())) {
                     includeStock = false;
                 }
             }
@@ -390,6 +456,9 @@ public class StockController extends HttpServlet {
         request.setAttribute("filterFruitName", fruitName);
         request.setAttribute("filterQuantityMin", quantityMin);
         request.setAttribute("filterQuantityMax", quantityMax);
+        if (user.getRole().equals("senior_management")) {
+            request.setAttribute("filterLocationName", locationName);
+        }
         
         String userRole = user.getRole();
         String destination;
