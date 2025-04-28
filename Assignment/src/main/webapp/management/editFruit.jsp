@@ -19,7 +19,7 @@
 <h1>Edit Fruit</h1>
 
 <form action="<%=request.getContextPath()%>/fruit" method="post">
-    <input type="hidden" name="action" value="edit">
+    <input type="hidden" name="action" value="confirmEdit">
     <input type="hidden" name="fruitID" value="<%= fruit.getFruitID()%>">
 
     <div class="form-group">
@@ -43,7 +43,7 @@
     </div>
 
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Update</button>
+        <button type="submit" class="btn">Continue</button>
         <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>
     </div>
 </form>

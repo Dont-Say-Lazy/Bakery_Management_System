@@ -89,6 +89,12 @@ public class FruitController extends HttpServlet {
             case "showEditForm":
                 showEditForm(request, response);
                 break;
+            case "confirmAdd":
+                confirmAdd(request, response);
+                break;
+            case "confirmEdit":
+                confirmEdit(request, response);
+                break;
             default:
                 listFruits(request, response);
         }
@@ -152,6 +158,38 @@ public class FruitController extends HttpServlet {
         FruitBean fruit = fruitDB.getFruitByID(fruitID);
         request.setAttribute("fruit", fruit);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/management/editFruit.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmAdd(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        String sourceCountry = request.getParameter("sourceCountry");
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("name", name);
+        request.setAttribute("description", description);
+        request.setAttribute("sourceCountry", sourceCountry);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmAddFruit.jsp");
+        dispatcher.forward(request, response);
+    }
+    
+    private void confirmEdit(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int fruitID = Integer.parseInt(request.getParameter("fruitID"));
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        String sourceCountry = request.getParameter("sourceCountry");
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("fruitID", fruitID);
+        request.setAttribute("name", name);
+        request.setAttribute("description", description);
+        request.setAttribute("sourceCountry", sourceCountry);
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmEditFruit.jsp");
         dispatcher.forward(request, response);
     }
     

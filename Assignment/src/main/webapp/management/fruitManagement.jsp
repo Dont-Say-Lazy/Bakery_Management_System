@@ -67,7 +67,7 @@
             <td><%= fruit.getSourceCountry()%></td>
             <td>
                 <a href="<%=request.getContextPath()%>/fruit?action=showEditForm&fruitID=<%= fruit.getFruitID()%>" class="btn">Edit</a>
-                <a href="<%=request.getContextPath()%>/fruit?action=delete&fruitID=<%= fruit.getFruitID()%>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this fruit?')">Delete</a>
+                <a href="<%=request.getContextPath()%>/fruit?action=delete&fruitID=<%= fruit.getFruitID()%>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this fruit? This action cannot be undone.')">Delete</a>
             </td>
         </tr>
         <%

@@ -93,6 +93,12 @@ public class UserController extends HttpServlet {
             case "delete":
                 deleteUser(request, response);
                 break;
+            case "confirmAdd":
+                confirmAdd(request, response);
+                break;
+            case "confirmEdit":
+                confirmEdit(request, response);
+                break;
             default:
                 listUsers(request, response);
         }
@@ -117,6 +123,34 @@ public class UserController extends HttpServlet {
         request.setAttribute("locations", locations);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("/management/addUser.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void confirmAdd(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+        String name = request.getParameter("name");
+        String locationIDStr = request.getParameter("locationID");
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("username", username);
+        request.setAttribute("password", password);
+        request.setAttribute("role", role);
+        request.setAttribute("name", name);
+        request.setAttribute("locationID", locationIDStr);
+        
+        // Get location name for display
+        if (locationIDStr != null && !locationIDStr.isEmpty()) {
+            int locationID = Integer.parseInt(locationIDStr);
+            LocationBean location = locationDB.getLocationByID(locationID);
+            if (location != null) {
+                request.setAttribute("locationName", location.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmAddUser.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -173,6 +207,36 @@ public class UserController extends HttpServlet {
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID is required");
         }
+    }
+
+    private void confirmEdit(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int userID = Integer.parseInt(request.getParameter("userID"));
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+        String name = request.getParameter("name");
+        String locationIDStr = request.getParameter("locationID");
+        
+        // Store form data in request attributes for confirmation page
+        request.setAttribute("userID", userID);
+        request.setAttribute("username", username);
+        request.setAttribute("password", password);
+        request.setAttribute("role", role);
+        request.setAttribute("name", name);
+        request.setAttribute("locationID", locationIDStr);
+        
+        // Get location name for display
+        if (locationIDStr != null && !locationIDStr.isEmpty()) {
+            int locationID = Integer.parseInt(locationIDStr);
+            LocationBean location = locationDB.getLocationByID(locationID);
+            if (location != null) {
+                request.setAttribute("locationName", location.getName());
+            }
+        }
+        
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/management/confirmEditUser.jsp");
+        dispatcher.forward(request, response);
     }
 
     private void editUser(HttpServletRequest request, HttpServletResponse response)

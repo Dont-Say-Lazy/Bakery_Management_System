@@ -21,7 +21,7 @@
 <h1>Edit User</h1>
 
 <form action="<%=request.getContextPath()%>/user" method="post">
-    <input type="hidden" name="action" value="edit">
+    <input type="hidden" name="action" value="confirmEdit">
     <input type="hidden" name="userID" value="<%= editUser.getUserID()%>">
 
     <div class="form-group">
@@ -71,7 +71,7 @@
     </div>
 
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Update User</button>
+        <button type="submit" class="btn">Continue</button>
         <a href="<%=request.getContextPath()%>/user?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>
     </div>
 </form>

@@ -12,7 +12,7 @@
 <h1>Add New User</h1>
 
 <form action="<%=request.getContextPath()%>/user" method="post">
-    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="action" value="confirmAdd">
 
     <div class="form-group">
         <label for="username">Username:</label>
@@ -57,7 +57,7 @@
     </div>
 
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Add User</button>
+        <button type="submit" class="btn">Continue</button>
         <a href="<%=request.getContextPath()%>/user?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>
     </div>
 </form>

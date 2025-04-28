@@ -113,7 +113,7 @@
             <td><%= locationName%></td>
             <td>
                 <a href="<%=request.getContextPath()%>/user?action=showEditForm&userID=<%= u.getUserID()%>" class="btn">Edit</a>
-                <a href="<%=request.getContextPath()%>/user?action=delete&userID=<%= u.getUserID()%>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                <a href="<%=request.getContextPath()%>/user?action=delete&userID=<%= u.getUserID()%>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">Delete</a>
             </td>
         </tr>
         <%

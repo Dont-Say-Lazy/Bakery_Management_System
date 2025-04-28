@@ -10,7 +10,7 @@
 <h1>Add New Fruit</h1>
 
 <form action="<%=request.getContextPath()%>/fruit" method="post">
-    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="action" value="confirmAdd">
 
     <div class="form-group">
         <label for="name">Name:</label>
@@ -33,7 +33,7 @@
     </div>
 
     <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Save</button>
+        <button type="submit" class="btn">Continue</button>
         <a href="<%=request.getContextPath()%>/fruit?action=list" class="btn" style="background-color: #ccc; color: #333;">Cancel</a>
     </div>
 </form>
