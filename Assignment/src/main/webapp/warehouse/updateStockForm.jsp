@@ -106,31 +106,35 @@
             </div>
         <% } %>
     <% } else { %>
-    <div style="background-color: #f8f9fa; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3 style="margin-top: 0; color: #333;">Select Fruit to Update</h3>
+    <div style="background-color: #f9f9f9; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #333; font-weight: bold; font-size: 1.2em;">Select Fruit to Update</h3>
         <form action="<%=request.getContextPath()%>/stock" method="get">
             <input type="hidden" name="action" value="showUpdateForm">
             
             <div style="margin-bottom: 15px;">
-                <label for="fruitID" style="display: block; margin-bottom: 5px; font-weight: bold;">Fruit:</label>
-                <select id="fruitID" name="fruitID" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <label for="fruitID" style="display: block; margin-bottom: 8px; color: #333; font-weight: bold;">Fruit:</label>
+                <select id="fruitID" name="fruitID" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; background-color: white;">
                     <option value="">Select Fruit</option>
                     <% 
                         ArrayList<FruitBean> fruits = (ArrayList<FruitBean>) request.getAttribute("fruits");
                         if (fruits != null) {
                             for (FruitBean fruit : fruits) {
+                                // Check if this fruit has stock at the current location
+                                StockBean fruitStock = stockDB.getStockByLocationAndFruit(user.getLocationID(), fruit.getFruitID());
+                                if (fruitStock != null && fruitStock.getQuantity() > 0) {
                     %>
-                        <option value="<%= fruit.getFruitID() %>"><%= fruit.getName() %></option>
+                        <option value="<%= fruit.getFruitID() %>"><%= fruit.getName() %> (Available: <%= fruitStock.getQuantity() %>)</option>
                     <% 
+                                }
                             }
                         }
                     %>
                 </select>
             </div>
             
-            <div style="margin-top: 20px;">
-                <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px;">Continue</button>
-                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; margin-left: 10px; font-size: 16px;">Cancel</a>
+            <div style="margin-top: 25px; display: flex;">
+                <button type="submit" class="btn" style="background-color: #28a745; color: white; border-radius: 50px; padding: 10px 30px; border: none; font-size: 16px; min-width: 120px;">Continue</button>
+                <a href="<%=request.getContextPath()%>/stock?action=view" class="btn" style="background-color: #dc3545; color: white; border-radius: 50px; padding: 10px 30px; text-decoration: none; display: inline-block; text-align: center; margin-left: 10px; font-size: 16px; min-width: 120px;">Cancel</a>
             </div>
         </form>
     </div>
