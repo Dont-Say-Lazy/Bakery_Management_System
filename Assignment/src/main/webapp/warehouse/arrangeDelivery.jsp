@@ -1,7 +1,7 @@
 <%-- 
     Document   : arrangeDelivery
     Created on : 23 Apr 2025, 23:05:05
-    Author     : User
+    Author     : AlexS
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -9,8 +9,12 @@
 <%@ taglib uri="/WEB-INF/tlds/locations" prefix="loc" %>
 <%@page import="java.util.ArrayList"%>
 <%@page import="ict.bean.ReservationBean"%>
+<%@page import="ict.bean.FruitBean"%>
+<%@page import="ict.bean.StockBean"%>
 <%@page import="ict.db.ReservationDB"%>
 <%@page import="ict.db.LocationDB"%>
+<%@page import="ict.db.FruitDB"%>
+<%@page import="ict.db.StockDB"%>
 
 <% 
     String dbUrl = application.getInitParameter("dbUrl");
@@ -23,6 +27,16 @@
     // Get the user's location ID for pre-selection
     int userLocationID = user.getLocationID();
     boolean isCentralStaff = user.getIsCentralStaff() == 1;
+    
+    // Get StockDB instance for stock validation
+    StockDB stockDB = new StockDB(dbUrl, dbUser, dbPassword);
+    
+    // Get fruits for selection dropdown (will be filtered by JavaScript)
+    FruitDB fruitDB = new FruitDB(dbUrl, dbUser, dbPassword);
+    ArrayList<FruitBean> allFruits = fruitDB.queryFruit();
+    
+    // Get stock at user's location to initialize the fruit dropdown
+    ArrayList<StockBean> stockAtLocation = stockDB.queryStockByLocation(userLocationID);
 %>
 
 <h1>Arrange Deliveries</h1>
@@ -81,7 +95,7 @@
                      required="true" 
                      selectedValue="<%= String.valueOf(userLocationID) %>"
                      selectorType="source"
-                     onChange="validateLocations()" />
+                     onChange="validateLocations(); updateFruitOptions();" />
     </div>
     
     <div class="form-group">
@@ -92,6 +106,38 @@
                      excludeIds="<%= String.valueOf(userLocationID) %>"
                      selectorType="destination"
                      onChange="validateLocations()" />
+    </div>
+    
+    <div class="form-group">
+        <label for="fruitID">Fruit:</label>
+        <select id="fruitID" name="fruitID" class="form-control" required onChange="updateMaxQuantity()">
+            <option value="">-- Select Fruit --</option>
+            <% 
+                // Only show fruits that are in stock at the source location
+                if (stockAtLocation != null && !stockAtLocation.isEmpty()) {
+                    for (StockBean stock : stockAtLocation) {
+                        if (stock.getQuantity() > 0) {
+            %>
+            <option value="<%= stock.getFruitID() %>" data-quantity="<%= stock.getQuantity() %>">
+                <%= stock.getFruitName() %> (Available: <%= stock.getQuantity() %>)
+            </option>
+            <% 
+                        }
+                    }
+                } 
+            %>
+        </select>
+        <div id="noFruitError" style="color: red; display: none; margin-top: 5px;">
+            No fruits available at the selected source location.
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" min="1" class="form-control" required>
+        <div id="quantityError" style="color: red; display: none; margin-top: 5px;">
+            Quantity cannot exceed available stock.
+        </div>
     </div>
     
     <div class="form-group">
@@ -119,6 +165,93 @@
     var todayFormatted = today.toISOString().split('T')[0];
     document.getElementById('deliveryDate').setAttribute('min', todayFormatted);
     
+    // Store all fruits in JavaScript for filtering
+    var allFruits = [
+        <% for (FruitBean fruit : allFruits) { %>
+            { id: <%= fruit.getFruitID() %>, name: "<%= fruit.getName() %>" },
+        <% } %>
+    ];
+    
+    // Store all stock data in JavaScript
+    var stockData = [
+        <% 
+        // Get all stock data for dynamic updates
+        ArrayList<StockBean> allStock = stockDB.queryStock();
+        for (StockBean stock : allStock) { 
+            if (stock.getQuantity() > 0) {
+        %>
+            { 
+                locationId: <%= stock.getLocationID() %>, 
+                fruitId: <%= stock.getFruitID() %>, 
+                fruitName: "<%= stock.getFruitName() %>", 
+                quantity: <%= stock.getQuantity() %> 
+            },
+        <% 
+            }
+        } 
+        %>
+    ];
+    
+    // Update fruit options based on selected source location
+    function updateFruitOptions() {
+        var sourceLocationID = document.getElementById('sourceLocationID').value;
+        var fruitSelect = document.getElementById('fruitID');
+        var noFruitError = document.getElementById('noFruitError');
+        
+        // Clear current options
+        fruitSelect.innerHTML = '<option value="">-- Select Fruit --</option>';
+        
+        // Filter stock for selected location
+        var availableFruits = stockData.filter(function(stock) {
+            return stock.locationId == sourceLocationID;
+        });
+        
+        if (availableFruits.length === 0) {
+            noFruitError.style.display = 'block';
+            fruitSelect.disabled = true;
+        } else {
+            noFruitError.style.display = 'none';
+            fruitSelect.disabled = false;
+            
+            // Add available fruits to select
+            availableFruits.forEach(function(stock) {
+                var option = document.createElement('option');
+                option.value = stock.fruitId;
+                option.setAttribute('data-quantity', stock.quantity);
+                option.textContent = stock.fruitName + ' (Available: ' + stock.quantity + ')';
+                fruitSelect.appendChild(option);
+            });
+        }
+        
+        // Reset quantity field
+        document.getElementById('quantity').value = '';
+        updateMaxQuantity();
+    }
+    
+    // Update max quantity based on selected fruit
+    function updateMaxQuantity() {
+        var fruitSelect = document.getElementById('fruitID');
+        var quantityInput = document.getElementById('quantity');
+        var quantityError = document.getElementById('quantityError');
+        
+        if (fruitSelect.selectedIndex > 0) {
+            var selectedOption = fruitSelect.options[fruitSelect.selectedIndex];
+            var maxQuantity = parseInt(selectedOption.getAttribute('data-quantity'));
+            
+            // Set max attribute on quantity input
+            quantityInput.setAttribute('max', maxQuantity);
+            
+            // If current value exceeds max, reset it
+            if (parseInt(quantityInput.value) > maxQuantity) {
+                quantityInput.value = maxQuantity;
+            }
+        } else {
+            quantityInput.removeAttribute('max');
+        }
+        
+        quantityError.style.display = 'none';
+    }
+    
     // Validate that source and destination are different
     function validateLocations() {
         var sourceLocationID = document.getElementById('sourceLocationID').value;
@@ -139,17 +272,39 @@
     document.getElementById('deliveryForm').addEventListener('submit', function(e) {
         var sourceLocationID = document.getElementById('sourceLocationID').value;
         var destinationLocationID = document.getElementById('destinationLocationID').value;
+        var fruitSelect = document.getElementById('fruitID');
+        var quantityInput = document.getElementById('quantity');
+        var quantityError = document.getElementById('quantityError');
+        var valid = true;
         
+        // Validate locations
         if (sourceLocationID && destinationLocationID && sourceLocationID === destinationLocationID) {
-            e.preventDefault();
             document.getElementById('locationError').style.display = 'block';
+            valid = false;
+        }
+        
+        // Validate quantity against stock
+        if (fruitSelect.selectedIndex > 0) {
+            var selectedOption = fruitSelect.options[fruitSelect.selectedIndex];
+            var maxQuantity = parseInt(selectedOption.getAttribute('data-quantity'));
+            var requestedQuantity = parseInt(quantityInput.value);
+            
+            if (requestedQuantity > maxQuantity) {
+                quantityError.style.display = 'block';
+                valid = false;
+            }
+        }
+        
+        if (!valid) {
+            e.preventDefault();
             return false;
         }
         return true;
     });
     
-    // Initialize validation
+    // Initialize
     validateLocations();
+    updateMaxQuantity();
 </script>
 
 <%@include file="../footer.jsp"%>
