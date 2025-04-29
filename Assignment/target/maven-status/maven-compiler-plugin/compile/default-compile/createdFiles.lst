@@ -17,7 +17,10 @@ ict\db\ReservationDB.class
 ict\servlet\FruitController.class
 ict\servlet\ReservationController.class
 ict\bean\StockBean.class
+ict\db\DeliveryDB.class
+ict\servlet\DeliveryController.class
 ict\servlet\BorrowingController.class
+ict\bean\DeliveryBean.class
 ict\db\StockDB.class
 com\mycompany\assignment\JAXRSConfiguration.class
 ict\tag\StockLevelTag.class
