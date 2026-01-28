@@ -1,7 +1,5 @@
 # Bakery Management System
 
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/Dont-Say-Lazy/Bakery_Management_System)
-
 This project is a comprehensive Bakery Management System built as a Java web application. It is designed to manage inventory, logistics, and user roles across a network of bakeries, warehouses, and central warehouses. The system provides role-based access for senior management, warehouse staff, and shop staff, each with a dedicated dashboard and functionalities.
 
 ## Key Features
